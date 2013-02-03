@@ -59,6 +59,15 @@
 
 (def attributes        html-attributes)
 
+;; doctype
+
+(def doctype-prolog    (token* "!!!" ))
+(def doctype-content   (many (anything-but \newline)))
+(def doctype           (>> doctype-prolog doctype-content))
+(def doctypes          (sep-by (many new-line*) doctype))
+
+;; tag
+
 (def tag               (bind [el (optional element)
                               c1 (many class)
                               id (optional id)
@@ -70,13 +79,9 @@
                                       :classes (into #{} (concat c1 c2))
                                       :self-close? (boolean cl)})))
                         
-(def not-nl            (satisfy #(not= % \newline)))
-
-(def text              (<+> (many not-nl)))
+(def text              (<+> (many (anything-but \newline))))
 
 (def inline-content    (>> (optional (sym* \space)) text))
-
-(def nested-content    text)
 
 (def indent            (<*> space space))
 
@@ -93,7 +98,7 @@
                         
 (def lines             (many line))
                         
-(def haml              (<< lines eof))
+(def haml              (<< (<*> doctypes lines) eof))
 
 (println "------------------------------------------------------------------------")
 
