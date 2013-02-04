@@ -76,7 +76,7 @@
                             (many white-space)
                             ruby-value))
 
-(def ruby-attr-sep     (<*> (many white-space) (sym* \,) (many white-space)))
+(def ruby-attr-sep     (<:> (<*> (many white-space) (sym* \,) (many white-space))))
 
 (def ruby-attr-pairs   (sep-by ruby-attr-sep ruby-attr-pair))
 
