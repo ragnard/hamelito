@@ -67,7 +67,8 @@
                             (quoted-any \")
                             (quoted-any \')))
 
-(def ruby-value        (<|> (quoted-any \")
+(def ruby-value        (<|> (<+> (many1 identifier))
+                            (quoted-any \")
                             (quoted-any \')))
 
 (def ruby-attr-pair    (<*> ruby-name
