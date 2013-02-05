@@ -64,7 +64,7 @@
 
   "%x.a.b#c.d.e Blahonga"
   "<x class=\"a b d e\" id=\"c\">Blahonga</x>"
-  
+
   )
 
 (defhtmltest nested-elements
@@ -79,8 +79,72 @@
   "<div><div></div></div><div></div>"
 
   "%div Hello There\n  %div Stranger!\n%div More Stuff"
-  "<div>Hello There<div>Stranger!</div></div><div>More Stuff</div>"
+  "<div>Hello There<div>Stranger!</div></div><div>More Stuff</div>")
 
+(defhtmltest nested-content
 
-  
+  "%div The quick\n  %p Brown\n    Fox\n  Jumped\n"
+  "<div>The quick<p>BrownFox</p>Jumped</div>"
+
+  )
+
+(defhtmltest html-attributes
+
+  "%div()"
+  "<div></div>"
+
+  "%div()"
+  "<div></div>"
+
+  "%div(abc='def')"
+  "<div abc=\"def\"></div>"
+
+  "%div(abc=\"def\")"
+  "<div abc=\"def\"></div>"
+
+  "%div('abc'=\"def\")"
+  "<div abc=\"def\"></div>"
+
+  "%div(\"abc\"=\"def\")"
+  "<div abc=\"def\"></div>"
+
+  "%div(  abc='def')"
+  "<div abc=\"def\"></div>"
+
+  "%div(abc='def' )"
+  "<div abc=\"def\"></div>"
+
+  "%div(  abc='def'   )"
+  "<div abc=\"def\"></div>"
+
+  "%div(   abc='def'  cde='fgh'   )"
+  "<div abc=\"def\" cde=\"fgh\"></div>"
+
+  "%div(   \nabc='def'\n  cde='fgh'\n\n   )"
+  "<div abc=\"def\" cde=\"fgh\"></div>"
+
+  )
+
+(defhtmltest ruby-attributes
+
+  "%div{}"
+  "<div></div>"
+
+  "%div{:abc=>'def'}"
+  "<div abc=\"def\"></div>"
+
+  "%div{:abc  =>  'def'}"
+  "<div abc=\"def\"></div>"
+
+  "%div{  :abc => 'def'}"
+  "<div abc=\"def\"></div>"
+
+  "%div{:abc => 'def' }"
+  "<div abc=\"def\"></div>"
+
+  "%div{   :abc=>'def' ,  :cde=>'fgh'   }"
+  "<div abc=\"def\" cde=\"fgh\"></div>"
+
+  "%div{   :abc=>'def'\n , \n :cde=>'fgh' \n\n  }"
+  "<div abc=\"def\" cde=\"fgh\"></div>"
   )

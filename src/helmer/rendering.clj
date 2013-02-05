@@ -3,19 +3,8 @@
             [hiccup.compiler :as hc]
             [helmer.parsing :as p]))
 
-(def ast-hiccup [:div {}
-                 [:div {} 
-                  [:p.pretty {} "text"]]])
 
-
-(defn tag?
-  [{:keys [element id classes]}]
-  (and (nil? element)
-       (nil? id)
-       (empty? classes)))
-
-
-(defn make-tag
+(defn hiccup-tag
   [{:keys [element id classes]}]
   (keyword (str (or element "div")
                 (when id
@@ -23,13 +12,16 @@
                 (when-not (empty? classes)
                   (str "." (string/join "." classes))))))
 
-(defn to-hiccup2
-  [tag content]
+(defn tag-data->hiccup
+  [{:keys [tag content]}]
   (if tag
-    (let [tag-name (make-tag tag)]
-      (if content
-        [tag-name {} content]
-        [tag-name {}]))
+    (reduce (fn [res val]
+              (if val
+                (conj res val)
+                res))
+            [(hiccup-tag tag)]
+            [(or (:attributes tag) {})
+             content])
     content))
 
 (def vec-conj (fnil conj []))
@@ -43,13 +35,12 @@
     (vec-conj data new)))
 
 
-(defn hepp
+(defn- hepp
   [input]
   (let [ast (p/parse-haml input)]
-    (clojure.pprint/pprint ast)
-    (reduce (fn [res {:keys [level tag content] :as data}]
-              (if data
-                (update-level res level (to-hiccup2 tag content))
+    (reduce (fn [res {:keys [level tag content] :as tag-data}]
+              (if tag-data
+                (update-level res level (tag-data->hiccup tag-data))
                 res))
             [:root {}]
             (:value ast))))
@@ -61,6 +52,7 @@
 (defn to-html
   [input]
   (let [res (hepp input)]
+    (clojure.pprint/pprint res)
     (eval (apply hc/compile-html (drop 2 res )))))
 
 (comment

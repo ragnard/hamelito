@@ -42,7 +42,10 @@
 
 ;; html-style attributes
 
-(def html-name         (<+> (many1 identifier)))
+(def html-name         (<|> (<+> (many1 identifier))
+                            (quoted-any \")
+                            (quoted-any \')))
+
 (def html-value        (<|> (<+> (many1 identifier))
                             (quoted-any \")
                             (quoted-any \')))
@@ -53,7 +56,8 @@
                               value html-value]
                              (return [name value])))
 
-(def html-attr-pairs   (sep-by (many1 white-space) html-attr-pair))
+(def html-attr-sep     (many1 white-space))
+(def html-attr-pairs   (sep-end-by html-attr-sep html-attr-pair))
 
 (def open-paren        (sym* \())
 (def close-paren       (sym* \)))
@@ -61,8 +65,8 @@
 
 ;; ruby-style attributes
 
-(def ruby-keyword      (bind [_    (sym* \:)
-                              name (<+> (many1 identifier))]
+(def ruby-keyword      (bind [_      (sym* \:)
+                              name   (<+> (many1 identifier))]
                              (return (keyword name))))
 
 (def ruby-name         (<|> ruby-keyword
@@ -85,7 +89,8 @@
                                  (sym* \,)
                                  (many white-space))))
 
-(def ruby-attr-pairs   (sep-by ruby-attr-sep ruby-attr-pair))
+(def ruby-attr-pairs   (<< (sep-by ruby-attr-sep ruby-attr-pair)
+                           (many white-space)))
 
 (def open-curly        (sym* \{))
 (def close-curly       (sym* \}))
