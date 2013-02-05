@@ -29,11 +29,11 @@
   "\n\n%div"
   "<div></div>"
 
-  ;; "%div\n\n"
-  ;; "<div></div>"
+  "%div\n\n"
+  "<div></div>"
 
   "%p"
-  "<p />"
+  "<p />"                               ; hiccup auto-closes
 
   "%p Foo"
   "<p>Foo</p>"

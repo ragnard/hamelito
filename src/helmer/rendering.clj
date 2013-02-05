@@ -23,7 +23,7 @@
                 (when-not (empty? classes)
                   (str "." (string/join "." classes))))))
 
-(defn to-hiccup
+(defn to-hiccup2
   [tag content]
   (if tag
     (let [tag-name (make-tag tag)]
@@ -49,11 +49,14 @@
     (clojure.pprint/pprint ast)
     (reduce (fn [res {:keys [level tag content] :as data}]
               (if data
-                (update-level res level (to-hiccup tag content))
-                data))
+                (update-level res level (to-hiccup2 tag content))
+                res))
             [:root {}]
             (:value ast))))
 
+(defn to-hiccup
+  [input]
+  (hepp input))
 
 (defn to-html
   [input]
