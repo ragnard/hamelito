@@ -1,7 +1,7 @@
-(ns helmer.rendering
+(ns hamelito.rendering
   (:require [clojure.string :as string]
             [hiccup.compiler :as hc]
-            [helmer.parsing :as p]))
+            [hamelito.parsing :as p]))
 
 
 (defn hiccup-tag

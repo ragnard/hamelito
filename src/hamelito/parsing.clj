@@ -1,4 +1,4 @@
-(ns helmer.parsing
+(ns hamelito.parsing
   (:refer-clojure :exclude [class])
   (:require [clojure.string :as string]
             [hiccup.core    :as hiccup]

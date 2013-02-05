@@ -1,5 +1,5 @@
-(ns helmer.rendering-test
-  (:require [helmer.rendering :as r])
+(ns hamelito.rendering-test
+  (:require [hamelito.rendering :as r])
   (:use [clojure.test]))
 
 (defmacro defhtmltest
@@ -41,6 +41,7 @@
   "<p>Foo Bar</p>")
 
 (defhtmltest elements
+
   "%x"
   "<x />"
 

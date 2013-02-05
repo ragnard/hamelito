@@ -1,8 +1,8 @@
-(ns helmer.haml-spec-test
+(ns hamelito.haml-spec-test
   (:require [cheshire.core   :as json]
             [clojure.string  :as string]
             [clojure.java.io :as io]
-            [helmer.parsing :as haml])
+            [hamelito.parsing :as haml])
   (:use [clojure.test :only [deftest is testing]]))
 
 (def haml-spec (json/parse-stream
