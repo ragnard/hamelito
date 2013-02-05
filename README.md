@@ -11,12 +11,12 @@ The main goal is to allow HAML documents to be used as templates for
 
 ## Status
 
-NOT USABLE. YET.
+**NOT USABLE. YET.**
 
 **5/2/2013**: 
-Parser works ok. 
-Hacky conversion to Hiccup to allow some HAML->HTML tests.
-Data representions still settling.
+- Parser works ok.
+- Hacky conversion to Hiccup to allow some `HAML->HTML` [tests](https://github.com/ragnard/hamelito/blob/master/test/hamelito/rendering_test.clj).
+- Data representions still fluctuating heavily.
 
  
 ## Usage
