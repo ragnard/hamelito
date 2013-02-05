@@ -1,5 +1,8 @@
 (ns hamlite.parsing
   (:refer-clojure :exclude [class])
+  (:require [clojure.string :as string]
+            [hiccup.core    :as hiccup]
+            [hiccup.compiler :as hiccup-compiler])
   (:use [blancas.kern.core]))
 
 ;;;; helpers
@@ -14,7 +17,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; HAML parser
+;;;; HAML(ish) parser
 
 ;; doctype
 (def doctype-prolog    (token* "!!!" ))
@@ -31,13 +34,6 @@
   (>> (token* prefix)
       (<+> (many1 identifier))))
 
-
-(def element           (prefixed-identifier "%"))
-(def id                (prefixed-identifier "#"))
-(def class             (prefixed-identifier "."))
-
-
-
 ;;;; attributes
 
 (defn quoted-any
@@ -51,7 +47,11 @@
                             (quoted-any \")
                             (quoted-any \')))
 
-(def html-attr-pair    (<*> html-name (sym* \=) html-value))
+(def html-attr-pair    (bind [_     (many white-space)
+                              name  html-name
+                              _     (sym* \=)
+                              value html-value]
+                             (return [name value])))
 
 (def html-attr-pairs   (sep-by (many1 white-space) html-attr-pair))
 
@@ -61,7 +61,9 @@
 
 ;; ruby-style attributes
 
-(def ruby-keyword      (<+> (sym* \:) (many1 identifier)))
+(def ruby-keyword      (bind [_    (sym* \:)
+                              name (<+> (many1 identifier))]
+                             (return (keyword name))))
 
 (def ruby-name         (<|> ruby-keyword
                             (quoted-any \")
@@ -71,27 +73,32 @@
                             (quoted-any \")
                             (quoted-any \')))
 
-(def ruby-attr-pair    (<*> ruby-name
-                            (many white-space)
-                            (token* "=>")
-                            (many white-space)
-                            ruby-value))
+(def ruby-attr-pair    (bind [_      (many white-space)
+                              name   ruby-name
+                              _      (many white-space)  
+                              _      (token* "=>")
+                              _      (many white-space)
+                              value  ruby-value]
+                             (return [name value])))
 
-(def ruby-attr-sep     (<:> (<*> (many white-space) (sym* \,) (many white-space))))
+(def ruby-attr-sep     (<:> (<*> (many white-space)
+                                 (sym* \,)
+                                 (many white-space))))
 
 (def ruby-attr-pairs   (sep-by ruby-attr-sep ruby-attr-pair))
 
 (def open-curly        (sym* \{))
 (def close-curly       (sym* \}))
-(def ruby-attributes   (between open-curly close-curly
-                                (<*> (many white-space)
-                                     ruby-attr-pairs
-                                     (many white-space))))
+(def ruby-attributes   (between open-curly close-curly ruby-attr-pairs))
 
 (def attributes        (<|> html-attributes ruby-attributes))
 
 
 ;; tag
+
+(def element           (prefixed-identifier "%"))
+(def id                (prefixed-identifier "#"))
+(def class             (prefixed-identifier "."))
 
 (def tag               (bind [el (optional element)
                               c1 (many class)
@@ -103,9 +110,9 @@
                                       :id id
                                       :classes (into #{} (concat c1 c2))
                                       :self-close? (boolean cl)
-                                      :attributes at})))
-                        
-(def text              (<+> (many (anything-but \newline))))
+                                      :attributes (into {} at)})))
+
+(def text              (<+> (many1 (anything-but \newline))))
 
 (def inline-content    (>> (optional (sym* \space)) text))
 
@@ -113,21 +120,21 @@
 
 (def tag-line          (bind [level   (many indent)
                               t       tag
-                              content inline-content]
+                              content (optional inline-content)]
                              (return {:level (count level)
                                       :tag t
                                       :content content})))
-                        
+
 (def vspace            (many new-line*))
-                        
-(def line              (>> vspace tag-line))
-                        
+
+(def line              (>> vspace (<|> eof tag-line )))
+
 (def lines             (many line))
-                        
-(def haml              (<< lines eof))
+
+(def haml              lines)
 ;; (def haml              (<< (<*> doctypes lines) eof))
 
-;(run* element "%d")
+                                        ;(run* element "%d")
 
 (comment
 
@@ -143,11 +150,15 @@
 
   (run* haml "%p(a='b'\n  c='d')")
 
-  (run* haml "%div\n  %div\n    %p\n      text")
+  (run* haml "%div\n  %div\n    %p\n      text"  nil [:root {}])
+
+  (pprint (parse-haml "%div{ :blah => 'honga'}\n  %div\n    %p\n      text\n\n"))
+
+
+  (to-html "%div Hej %div Hej")
   
   )
 
 (defn parse-haml
   [input]
   (parse haml input))
-
