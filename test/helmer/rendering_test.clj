@@ -2,52 +2,55 @@
   (:require [helmer.rendering :as r])
   (:use [clojure.test]))
 
-(defmacro rendering-test
+(defmacro defhtmltest
   [name & test-cases]
   `(deftest ~name
      (are [input# expected#] (= expected# (r/to-html input#))
           ~@test-cases)))
 
 
-(rendering-test basic
-                
-                ""
-                ""
+(defhtmltest basic
 
-                "A"
-                "A"
+  ""
+  ""
 
-                "foo bar"
-                "foo bar"
+  "A"
+  "A"
 
-                "%div"
-                "<div></div>"
+  "foo bar"
+  "foo bar"
 
-                "%div\n%div"
-                "<div></div><div></div>"
+  "%div"
+  "<div></div>"
 
-                "\n\n%div"
-                "<div></div>"
+  "%div\n%div"
+  "<div></div><div></div>"
 
-                ;; "%div\n\n"
-                ;; "<div></div>"
+  "\n\n%div"
+  "<div></div>"
 
-                "%p"
-                "<p />"
+  ;; "%div\n\n"
+  ;; "<div></div>"
 
-                "%p Foo"
-                "<p>Foo</p>"
+  "%p"
+  "<p />"
 
-                "%p Foo Bar"
-                "<p>Foo Bar</p>")
+  "%p Foo"
+  "<p>Foo</p>"
 
-(rendering-test nested-elements
-                
-                "%div\n  %div"
-                "<div><div></div></div>"
+  "%p Foo Bar"
+  "<p>Foo Bar</p>")
 
-                "%div\n  %div\n%div"
-                "<div><div></div></div><div></div>"
-                
-                
-                )
+(defhtmltest nested-elements
+
+  "%div\n  %div"
+  "<div><div></div></div>"
+
+  "%div Hello There\n  %div Stranger!"
+  "<div>Hello There<div>Stranger!</div></div>"
+
+  "%div\n  %div\n%div"
+  "<div><div></div></div><div></div>"
+
+  "%div Hello There\n  %div Stranger!\n%div More Stuff"
+  "<div>Hello There<div>Stranger!</div></div><div>More Stuff</div>")
