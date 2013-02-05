@@ -1,4 +1,4 @@
-(ns hamlite.parsing
+(ns helmer.parsing
   (:refer-clojure :exclude [class])
   (:require [clojure.string :as string]
             [hiccup.core    :as hiccup]
@@ -75,7 +75,7 @@
 
 (def ruby-attr-pair    (bind [_      (many white-space)
                               name   ruby-name
-                              _      (many white-space)  
+                              _      (many white-space)
                               _      (token* "=>")
                               _      (many white-space)
                               value  ruby-value]
@@ -106,11 +106,15 @@
                               c2 (many class)
                               at (optional attributes)
                               cl (optional (token* "/"))]
-                             (return {:element el
-                                      :id id
-                                      :classes (into #{} (concat c1 c2))
-                                      :self-close? (boolean cl)
-                                      :attributes (into {} at)})))
+                             (return (when (or el
+                                               id
+                                               (not-empty c1)
+                                               (not-empty c2))
+                                       {:element el
+                                        :id id
+                                        :classes (into #{} (concat c1 c2))
+                                        :self-close? (boolean cl)
+                                        :attributes (into {} at)}))))
 
 (def text              (<+> (many1 (anything-but \newline))))
 
@@ -156,7 +160,7 @@
 
 
   (to-html "%div Hej %div Hej")
-  
+
   )
 
 (defn parse-haml
