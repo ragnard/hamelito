@@ -69,53 +69,6 @@
                (update-level 3 [:p {}  "Paragraph"])
                (update-level 2 [:h1 {}  "Title 2"])
                (update-level 0 "Heeej")))
-
-
-  
-  [[:html {}
-    [:head {}]
-    [:body {}
-     [:h1 {} "Title 1"
-      [:div {}]
-      [:p {} "Paragraph"]]
-     [:h1 {} "Title 2"]]]]
-
-
-  '{:indent 0
-    :tag "div"}
-
-
-  [:div {} _]
-
-  [tag attrs & body]
-
-
-  [:div {} nil]
-
-  (defn get-level
-    [data level]
-    (nth (iterate last data) level))
-
-  (defn vec-update-in
-    [v [k & ks] f & args]
-    (if ks
-      (vec-assoc v k (apply vec-update-in (get v k) ks f args))
-      (vec-assoc v k (apply f (get v k) args))))
-  
-  
-  (def d [:html {}
-          [:head]
-          [:body
-           [:h1 "Hello"]
-           [:p "Paragraph"]]])
-
-  
-
-  ;;
-  ;; - Find level (must exist)
-  ;; - conj
-  ;;
-
   )
 
 
