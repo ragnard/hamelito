@@ -24,13 +24,13 @@
 (defn hiccup
   [haml-source]
   (let [char-seq  (char-seq haml-source)
-        parse-res (parsing/parse-haml)])
-  (translation/to-hiccup haml-source))
+        parse-res (parsing/parse-haml char-seq)]
+    (translation/to-hiccup parse-res)))
 
 (defn html
   [haml-source]
   (let [hiccup-data (hiccup haml-source)]
-    (hiccup/html (seq hiccup))))
+    (hiccup/html (seq hiccup-data))))
 
 (defn- resource-stream
   [path]
