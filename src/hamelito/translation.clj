@@ -1,29 +1,9 @@
-(ns hamelito.hiccup
+(ns hamelito.translation
   (:require [clojure.string :as string]
             [hiccup.core     :as h]
-            [hiccup.compiler :as hc]
-            [hiccup.page     :as hp]
-            [hamelito.parsing :as p]))
-
-(defprotocol CharSeq
-  "things that can be seqs of characters"
-  (char-seq [this]))
-
-(defn- reader-char-seq
-  [rdr]
-  (let [c (.read rdr)]
-    (when (not= -1 c)
-      (cons (char c) (lazy-seq (reader-char-seq rdr))))))
-
-(extend-protocol CharSeq
-  String
-  (char-seq [s] (seq s))
-
-  java.io.Reader
-  (char-seq [rdr] (reader-char-seq rdr)))
+            [hiccup.page     :as hp]))
 
 (def vec-conj (fnil conj []))
-
 
 (defn tag->hiccup
   [{:keys [element id classes]}]
@@ -76,19 +56,13 @@
   (for [{:keys [doctype]} doctypes]
     (get doctype-map doctype nil)))
 
-(defn- to-hiccup
-  [source]
-  (let [char-seq  (char-seq source)
-        parse-res (p/parse-haml char-seq)
-        value     (:value parse-res)]
+(defn to-hiccup
+  [parse-res]
+  (let [value (:value parse-res)]
     (concat
-     (doctype->hiccup value)
-     (content->hiccup value))))
+       (doctype->hiccup value)
+       (content->hiccup value))))
 
-(defn to-html
-  [source]
-  (let [hiccup (to-hiccup source)]
-    (h/html (seq hiccup))))
 
 
 (comment

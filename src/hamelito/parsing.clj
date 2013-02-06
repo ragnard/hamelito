@@ -1,8 +1,6 @@
 (ns hamelito.parsing
   (:refer-clojure :exclude [class])
-  (:require [clojure.string :as string]
-            [hiccup.core    :as hiccup]
-            [hiccup.compiler :as hiccup-compiler])
+  (:require [clojure.string :as string])
   (:use [blancas.kern.core]))
 
 ;;;; helpers
