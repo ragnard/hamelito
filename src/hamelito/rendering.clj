@@ -3,6 +3,7 @@
             [hiccup.compiler :as hc]
             [hamelito.parsing :as p]))
 
+(def vec-conj (fnil conj []))
 
 (defn hiccup-tag
   [{:keys [element id classes]}]
@@ -24,26 +25,25 @@
              content])
     content))
 
-(def vec-conj (fnil conj []))
 
-(defn update-level
+(defn push-content
   [[tag attrs & body :as data] level new]
   (if (< 0 level)
     (conj (vec (concat [tag attrs]
                        (butlast body)))
-          (update-level (last body) (dec level) new))
+          (push-content (last body) (dec level) new))
     (vec-conj data new)))
 
 
 (defn- hepp
   [input]
-  (let [ast (p/parse-haml input)]
+  (let [parse-res (p/parse-haml input)]
     (reduce (fn [res {:keys [level tag content] :as tag-data}]
               (if tag-data
-                (update-level res level (tag-data->hiccup tag-data))
+                (push-content res level (tag-data->hiccup tag-data))
                 res))
             [:root {}]
-            (:value ast))))
+            (:lines (:value parse-res)))))
 
 (defn to-hiccup
   [input]

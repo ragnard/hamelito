@@ -21,9 +21,12 @@
 
 ;; doctype
 (def doctype-prolog    (token* "!!!" ))
-(def doctype-value     (many (anything-but \newline)))
-(def doctype           (>> doctype-prolog doctype-value))
-(def doctypes          (sep-by (many new-line*) doctype))
+(def doctype-value     (>> (sym* \space)
+                           (<+> (many (anything-but \newline)))))
+(def doctype           (bind [_     doctype-prolog
+                              value (optional doctype-value)]
+                             (return {:doctype (or value :default)})))
+(def doctypes          (sep-end-by (many new-line*) doctype))
 
 ;; general
 
@@ -140,10 +143,10 @@
 
 (def lines             (many line))
 
-(def haml              lines)
-;; (def haml              (<< (<*> doctypes lines) eof))
-
-                                        ;(run* element "%d")
+(def haml              (bind [ds doctypes
+                              ls lines]
+                             (return {:doctypes ds
+                                      :lines ls})))
 
 (comment
 
@@ -162,9 +165,6 @@
   (run* haml "%div\n  %div\n    %p\n      text"  nil [:root {}])
 
   (pprint (parse-haml "%div{ :blah => 'honga'}\n  %div\n    %p\n      text\n\n"))
-
-
-  (to-html "%div Hej %div Hej")
 
   )
 
