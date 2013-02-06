@@ -149,3 +149,19 @@
   "%div{   :abc=>'def'\n , \n :cde=>'fgh' \n\n  }"
   "<div abc=\"def\" cde=\"fgh\"></div>"
   )
+
+(defhtmltest doctypes
+
+  "!!!"
+  "<!DOCTYPE html>\n"
+
+  "\n\n!!!\n\n"
+  "<!DOCTYPE html>\n"
+  
+  "!!!\n%div Blahonga"
+  "<!DOCTYPE html>\n<div>Blahonga</div>"
+
+  "\n\n!!!\n\n%div Blahonga\n\n"
+  "<!DOCTYPE html>\n<div>Blahonga</div>"
+  
+  )

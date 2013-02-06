@@ -37,7 +37,8 @@
 (def doctype           (bind [_     doctype-def
                               value (optional doctype-value)]
                              (return {:doctype (or value :default)})))
-(def doctypes          (sep-end-by vspace doctype))
+(def doctypes          (>> (optional vspace)
+                           (sep-end-by vspace doctype)))
 
 
 ;;;; attributes
@@ -147,7 +148,7 @@
 (def haml              (bind [ds doctypes
                               ls lines]
                              (return {:doctypes ds
-                                      :lines ls})))
+                                      :content ls})))
 
 (comment
 
