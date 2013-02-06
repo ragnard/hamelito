@@ -19,23 +19,26 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; HAML(ish) parser
 
-;; doctype
-(def doctype-prolog    (token* "!!!" ))
-(def doctype-value     (>> (sym* \space)
-                           (<+> (many (anything-but \newline)))))
-(def doctype           (bind [_     doctype-prolog
-                              value (optional doctype-value)]
-                             (return {:doctype (or value :default)})))
-(def doctypes          (sep-end-by (many new-line*) doctype))
+;;;; general
 
-;; general
+(def identifier        (<|> alpha-num (sym* \-) (sym* \_)))
 
-(def identifier (<|> alpha-num (sym* \-) (sym* \_)))
+(def vspace            (many new-line*))
 
 (defn prefixed-identifier
   [prefix]
   (>> (token* prefix)
       (<+> (many1 identifier))))
+
+;;;; doctype
+(def doctype-def       (token* "!!!" ))
+(def doctype-value     (>> (sym* \space)
+                           (<+> (many (anything-but \newline)))))
+(def doctype           (bind [_     doctype-def
+                              value (optional doctype-value)]
+                             (return {:doctype (or value :default)})))
+(def doctypes          (sep-end-by vspace doctype))
+
 
 ;;;; attributes
 
@@ -136,8 +139,6 @@
                              (return {:level (count level)
                                       :tag t
                                       :content content})))
-
-(def vspace            (many new-line*))
 
 (def line              (>> vspace (<|> eof tag-line )))
 

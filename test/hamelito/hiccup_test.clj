@@ -1,11 +1,11 @@
-(ns hamelito.rendering-test
-  (:require [hamelito.rendering :as r])
+(ns hamelito.hiccup-test
+  (:require [hamelito.hiccup :as h])
   (:use [clojure.test]))
 
 (defmacro defhtmltest
   [name & test-cases]
   `(deftest ~name
-     (are [input# expected#] (= expected# (r/to-html input#))
+     (are [input# expected#] (= expected# (h/to-html input#))
           ~@test-cases)))
 
 (defhtmltest basic
