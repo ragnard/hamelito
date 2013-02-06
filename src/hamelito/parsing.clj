@@ -150,6 +150,10 @@
                              (return {:doctypes ds
                                       :content ls})))
 
+(defn parse-haml
+  [char-seq]
+  (parse haml char-seq))
+
 (comment
 
   (run* tag  "!!! XML\n\n%div.a.b.c#d42.e.f")
@@ -169,7 +173,3 @@
   (pprint (parse-haml "%div{ :blah => 'honga'}\n  %div\n    %p\n      text\n\n"))
 
   )
-
-(defn parse-haml
-  [input]
-  (parse haml input))
