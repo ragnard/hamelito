@@ -3,6 +3,9 @@
             [hiccup.core     :as h]
             [hiccup.page     :as hp]))
 
+(when (< (:minor *clojure-version*) 5)
+  (use 'hamelito.util))
+
 (def vec-conj (fnil conj []))
 
 (defn tag->hiccup
@@ -16,27 +19,29 @@
 (defn tag-data->hiccup
   [{:keys [tag content]}]
   (if tag
-    (reduce (fn [res val]
-              (if val
-                (conj res val)
-                res))
-            [(tag->hiccup tag)]
-            [(:attributes tag) content])
+    (let [attributes (:attributes tag)]
+      (cond-> [(tag->hiccup tag)]
+
+              attributes
+              (conj attributes)
+
+              content
+              (conj content)))
     content))
 
 (defn push-content
-  [data level content]
+  [hiccup-data level content]
   (if (< 0 level)
-    (let [fixed  (butlast data)
-          next   (last data)]
+    (let [fixed  (butlast hiccup-data)
+          next   (last hiccup-data)]
       (if (vector? next)
         (conj (vec fixed)
               (push-content next (dec level) content))
         (throw (ex-info "Missing parent for new element or content"
                         {:content content
-                         :state data
+                         :hiccup-data hiccup-data
                          :level level}))))
-    (vec-conj data content)))
+    (vec-conj hiccup-data content)))
 
 (defn- content->hiccup
   [{:keys [content]}]
