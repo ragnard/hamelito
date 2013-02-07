@@ -66,36 +66,24 @@
 
 ;; ruby-style attributes
 
-(def ruby-keyword      (bind [_      (sym* \:)
-                              name   (<+> (many1 identifier2))]
-                             (return (keyword name))))
+(def ruby-keyword      (lexeme (bind [_      (sym \:)
+                                      name   (<+> (many1 identifier2))]
+                                     (return (keyword name)))))
 
-(def ruby-name         (<|> ruby-keyword
-                            (quoted-any \")
-                            (quoted-any \')))
+(def ruby-name         (lexeme (<|> ruby-keyword
+                                    (quoted-any \")
+                                    (quoted-any \'))))
 
-(def ruby-value        (<|> (<+> (many1 identifier2))
-                            (quoted-any \")
-                            (quoted-any \')))
+(def ruby-value        (lexeme (<|> (<+> (many1 identifier2))
+                                    (quoted-any \")
+                                    (quoted-any \'))))
 
-(def ruby-attr-pair    (bind [_      (many white-space)
-                              name   ruby-name
-                              _      (many white-space)
-                              _      (token* "=>")
-                              _      (many white-space)
+(def ruby-attr-pair    (bind [name   ruby-name
+                              _      (token "=>")
                               value  ruby-value]
                              (return [name value])))
 
-(def ruby-attr-sep     (<:> (<*> (many white-space)
-                                 (sym* \,)
-                                 (many white-space))))
-
-(def ruby-attr-pairs   (<< (sep-by ruby-attr-sep ruby-attr-pair)
-                           (many white-space)))
-
-(def open-curly        (sym* \{))
-(def close-curly       (sym* \}))
-(def ruby-attributes   (between open-curly close-curly ruby-attr-pairs))
+(def ruby-attributes   (braces (comma-sep ruby-attr-pair)))
 
 (def attributes        (<|> html-attributes ruby-attributes))
 
