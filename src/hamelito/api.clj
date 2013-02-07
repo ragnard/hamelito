@@ -9,7 +9,7 @@
   (char-seq [this]))
 
 (defn reader-char-seq
-  [rdr]
+  [^java.io.Reader rdr]
   (let [c (.read rdr)]
     (when (not= -1 c)
       (cons (char c) (lazy-seq (reader-char-seq rdr))))))
@@ -32,7 +32,7 @@
   (let [hiccup-data (hiccup haml-source)]
     (hiccup/html (seq hiccup-data))))
 
-(defn- resource-stream
+(defn- ^java.io.InputStream resource-stream
   [path]
   (.. clojure.lang.RT baseLoader (getResourceAsStream path)))
 
