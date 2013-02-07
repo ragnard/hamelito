@@ -1,7 +1,8 @@
 (ns hamelito.parsing
   (:refer-clojure :exclude [class])
   (:require [clojure.string :as string])
-  (:use [blancas.kern.core]))
+  (:use [blancas.kern.core]
+        [blancas.kern.lexer.basic]))
 
 ;;;; helpers
 
@@ -19,14 +20,14 @@
 
 ;;;; general
 
-(def identifier        (<|> alpha-num (sym* \-) (sym* \_)))
+(def identifier2        (<|> alpha-num (sym* \-) (sym* \_)))
 
 (def vspace            (many new-line*))
 
 (defn prefixed-identifier
   [prefix]
   (>> (token* prefix)
-      (<+> (many1 identifier))))
+      (<+> (many1 identifier2))))
 
 ;;;; doctype
 (def doctype-def       (token* "!!!" ))
@@ -47,38 +48,33 @@
 
 ;; html-style attributes
 
-(def html-name         (<|> (<+> (many1 identifier))
-                            (quoted-any \")
-                            (quoted-any \')))
+(def html-name         (lexeme (<|> (<+> (many1 identifier2))
+                                    (quoted-any \")
+                                    (quoted-any \'))))
 
-(def html-value        (<|> (<+> (many1 identifier))
-                            (quoted-any \")
-                            (quoted-any \')))
+(def html-value        (lexeme (<|> (<+> (many1 identifier2))
+                                    (quoted-any \")
+                                    (quoted-any \'))))
 
-(def html-attr-pair    (bind [_     (many white-space)
-                              name  html-name
+(def html-attr-pair    (bind [name  html-name
                               _     (sym* \=)
                               value html-value]
                              (return [name value])))
 
-(def html-attr-sep     (many1 white-space))
-(def html-attr-pairs   (sep-end-by html-attr-sep html-attr-pair))
+(def html-attributes   (parens (many html-attr-pair)))
 
-(def open-paren        (sym* \())
-(def close-paren       (sym* \)))
-(def html-attributes   (between open-paren close-paren html-attr-pairs))
 
 ;; ruby-style attributes
 
 (def ruby-keyword      (bind [_      (sym* \:)
-                              name   (<+> (many1 identifier))]
+                              name   (<+> (many1 identifier2))]
                              (return (keyword name))))
 
 (def ruby-name         (<|> ruby-keyword
                             (quoted-any \")
                             (quoted-any \')))
 
-(def ruby-value        (<|> (<+> (many1 identifier))
+(def ruby-value        (<|> (<+> (many1 identifier2))
                             (quoted-any \")
                             (quoted-any \')))
 
