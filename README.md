@@ -66,17 +66,17 @@ The main public API is in `hamelito.api`;
 (h/html "%h1 Hola!")
 ; => "<h1>Hola!</h1>"
 
+;; A HAML source is anyhting that implements the CharSeq protocol, ie.
+;; can provide seq of chars, for example Reader:
+
+(h/html (java.io.StringReader. "%h1 Hola!"))
+; => "<h1>Hola!</h1>"
+
 ;; Hamelito parses HAML into Hiccup data and leans on Hiccup to do the
 ;; rendering. You can also ask for the Hicucp data:
 
 (h/hiccup "%h1 Hola")
 ; => ([:h1 {} "Hola"])
-
-;; An HAML source is anyhting that implements the CharSeq protocol,
-;; ie. can provide seq of chars, for example Reader:
-
-(h/html (java.io.StringReader. "%h1 Hola!"))
-; => "<h1>Hola!</h1>"
 ```
 
 ### enlive
