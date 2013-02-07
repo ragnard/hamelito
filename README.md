@@ -32,7 +32,7 @@ Things that should work:
   - HTML style: `%a(href='www.xkcd.org')`
     - Unquoted, single and double quoted values
 - Doctypes 
-  - Only !!! is currently supported an will yield HTML5 doctype
+  - Only `!!!` is currently supported an will yield HTML5 doctype
 
 HTML translation [tests](https://github.com/ragnard/hamelito/blob/master/test/hamelito/html_test.clj).
 
@@ -72,8 +72,8 @@ The main public API is in `hamelito.api`;
 (h/hiccup "%h1 Hola")
 ; => ([:h1 {} "Hola"])
 
-;; A HAML source is anyhting that implements CharSeq, ie. can provide
-;; seq of chars, for example Reader:
+;; An HAML source is anyhting that implements the CharSeq protocol,
+;; ie. can provide seq of chars, for example Reader:
 
 (h/html (java.io.StringReader. "%h1 Hola!"))
 ; => "<h1>Hola!</h1>"
