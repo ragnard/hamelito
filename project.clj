@@ -6,4 +6,6 @@
   :dependencies [[org.clojure/clojure "1.4.0"]
                  [hiccup "1.0.2"]
                  [org.blancas/kern "0.5.0"]
-                 [cheshire "5.0.1"]])
+                 [cheshire "5.0.1"]]
+  ;; :warn-on-reflection true
+  )

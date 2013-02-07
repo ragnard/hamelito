@@ -1,4 +1,4 @@
-(ns hamelito.api-test
+(ns hamelito.html-test
   (:require [hamelito.api :as hamelito])
   (:use [clojure.test]))
 
