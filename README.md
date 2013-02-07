@@ -4,7 +4,9 @@
 > looks up to his handsome relative, but has different goals in life.
 
 hamelito is a [Clojure](http://www.clojure.org) library implementing a
-small subset of HAML.
+small subset of HAML. Parsing is done using the completely awesome
+parser combinator library [kern](https://github.com/blancas/kern/) by
+Armando Blancas.
 
 The main goal is to allow HAML documents to be used as templates for
 [enlive](http://github.com/cgrand/enlive) and the plan is to support
