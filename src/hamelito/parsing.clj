@@ -148,9 +148,18 @@
                              (return {:doctypes ds
                                       :content ls})))
 
+(defn- parse-succeded?
+  [res]
+  (and (:ok res)
+       (nil? (seq (:input res)))))
+
 (defn parse-haml
   [char-seq]
-  (parse haml char-seq))
+  (let [parse-res (parse haml char-seq)]
+    (if (parse-succeded? parse-res)
+      parse-res
+      (throw (ex-info "HAML parsing failed"
+                      {:parse-result parse-res})))))
 
 (comment
 
