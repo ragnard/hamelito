@@ -29,19 +29,19 @@
     content))
 
 (defn push-content
-  [enlive-data level content]
+  [node-seq level content]
   (if (< 0 level)
-    (let [
-          fixed  (butlast enlive-data)
-          next   (last enlive-data)]
-      (if (vector? next)
+    (let [fixed  (butlast node-seq)
+          next   (last node-seq)]
+      (if (map? next)
         (conj (vec fixed)
-              (push-content next (dec level) content))
+              (update-in next [:content]
+                         push-content (dec level) content))
         (throw (ex-info "Missing parent for new element or content"
                         {:content content
-                         :hiccup-data enlive-data
+                         :node-seq node-seq
                          :level level}))))
-    (vec-conj enlive-data content)))
+    (vec-conj node-seq content)))
 
 (defn- content->node-seq
   [{:keys [content]}]
@@ -53,20 +53,12 @@
           content))
 
 
-(comment
-
-
-  (defn- doctype->hiccup
-    [{:keys [doctypes]}]
-    (for [{:keys [doctype]} doctypes]
-      (get doctype-map doctype nil))))
-
 (defn node-seq
   [parse-res]
   (let [value (:value parse-res)]
     (concat
-       ;(doctype->hiccup value)
-       (content->node-seq value))))
+     ;; TODO: doctype
+     (content->node-seq value))))
 
 
 (comment
@@ -84,6 +76,7 @@
       (push-content 0 {:tag :a})
       (push-content 1 {:tag :b}))
 
+
   (pprint  (-> []
                (push-content 0 [:html])
                (push-content 1 [:head])
@@ -95,4 +88,3 @@
                (push-content 3 [:h1 {}  "Title 2"])
                (push-content 0 "Heeej")))
   )
-
