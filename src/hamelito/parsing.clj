@@ -30,15 +30,13 @@
       (<+> (many1 identifier2))))
 
 ;;;; doctype
-(def doctype-def       (token* "!!!" ))
-(def doctype-value     (>> (sym* \space)
-                           (<+> (many (anything-but \newline)))))
-(def doctype           (bind [_     doctype-def
-                              value (optional doctype-value)]
-                             (return {:doctype (or value :default)})))
-(def doctypes          (>> (optional vspace)
-                           (sep-end-by vspace doctype)))
-
+(def doctype-def           (token* "!!!" ))
+(def doctype-value         (>> (sym* \space)
+                               (<+> (many (anything-but \newline)))))
+(def doctype               (bind [_     doctype-def
+                                  value (optional doctype-value)]
+                                 (return {:doctype (or value :default)})))
+(def doctypes              (many (lexeme doctype)))
 
 ;;;; attributes
 
@@ -132,6 +130,8 @@
                              (return {:doctypes ds
                                       :content ls})))
 
+(def start             (>> trim haml))
+
 (defn- parse-succeded?
   [res]
   (and (:ok res)
@@ -139,7 +139,7 @@
 
 (defn parse-haml
   [char-seq]
-  (let [parse-res (parse haml char-seq)]
+  (let [parse-res (parse start char-seq)]
     (if (parse-succeded? parse-res)
       parse-res
       (throw (ex-info "HAML parsing failed"
@@ -155,11 +155,11 @@
 
   (run* lines  "\n\n  %div.a.b.c#d42.e.f\n\n\n\n    %p Hello World!\n\n")
 
-  (run* haml  "%div/ Halo")
+  (run* start  "%div/ Halo")
 
-  (run* haml "%p(a='b'\n  c='d')")
+  (run* start "%p(a='b'\n  c='d')")
 
-  (run* haml "%div\n  %div\n    %p\n      text"  nil [:root {}])
+  (run* start "%div\n  %div\n    %p\n      text"  nil [:root {}])
 
   (pprint (parse-haml "%div{ :blah => 'honga'}\n  %div\n    %p\n      text\n\n"))
 
