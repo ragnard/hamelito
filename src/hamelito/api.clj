@@ -33,17 +33,7 @@
   (let [hiccup-data (hiccup haml-source)]
     (hiccup/html (seq hiccup-data))))
 
-(defn- ^java.io.InputStream resource-stream
-  [path]
-  (.. clojure.lang.RT baseLoader (getResourceAsStream path)))
-
-(defn haml-resource
-  [path]
-  (with-open [stream (resource-stream path)]
-    (let [html (html (io/reader stream))]
-      (java.io.StringReader. html))))
-
-(defn node-seq
+(defn enlive-node-seq
   [haml-source]
   (let [char-seq  (char-seq haml-source)
         parse-res (parsing/parse-haml char-seq)]
