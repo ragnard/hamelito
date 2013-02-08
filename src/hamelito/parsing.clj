@@ -30,13 +30,13 @@
       (<+> (many1 identifier2))))
 
 ;;;; doctype
-(def doctype-def           (token* "!!!" ))
-(def doctype-value         (>> (sym* \space)
-                               (<+> (many (anything-but \newline)))))
-(def doctype               (bind [_     doctype-def
-                                  value (optional doctype-value)]
-                                 (return {:doctype (or value :default)})))
-(def doctypes              (many (lexeme doctype)))
+(def doctype-def       (token* "!!!" ))
+(def doctype-value     (>> (sym* \space)
+                           (<+> (many (anything-but \newline)))))
+(def doctype           (bind [_     doctype-def
+                              value (optional doctype-value)]
+                             (return {:doctype (or value :default)})))
+(def doctypes          (many (lexeme doctype)))
 
 ;;;; attributes
 

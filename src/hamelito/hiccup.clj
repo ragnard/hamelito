@@ -1,7 +1,7 @@
-(ns hamelito.translation
-  (:require [clojure.string :as string]
-            [hiccup.core     :as h]
-            [hiccup.page     :as hp]))
+(ns hamelito.hiccup
+  (:require [hiccup.core     :as h]
+            [hiccup.page     :as hp]
+            [clojure.string  :as string]))
 
 (when (< (:minor *clojure-version*) 5)
   (use 'hamelito.util))
@@ -52,9 +52,11 @@
           []
           content))
 
+
 (def ^:private doctype-map
   {:default "<!DOCTYPE html>\n"
    "Strict" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"})
+
 
 (defn- doctype->hiccup
   [{:keys [doctypes]}]
@@ -67,7 +69,6 @@
     (concat
        (doctype->hiccup value)
        (content->hiccup value))))
-
 
 
 (comment
