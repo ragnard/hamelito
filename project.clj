@@ -10,5 +10,4 @@
   :profiles {:1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.5 {:dependencies [[org.clojure/clojure "1.5.0-RC15"]]}}
   :aliases {"all" ["with-profile" "1.4:1.5"]}
-  ;; :warn-on-reflection true
-  )
+  :warn-on-reflection true)
