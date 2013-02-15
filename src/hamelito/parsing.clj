@@ -1,22 +1,41 @@
 (ns hamelito.parsing
   (:refer-clojure :exclude [class])
   (:require [clojure.string :as string])
-  (:use [blancas.kern.core]
+  (:use [hamelito.parse-tree]
+        [blancas.kern.core]
         [blancas.kern.lexer.basic]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Parse Tree
 
-(defrecord HamlDocument [doctypes elements])
+(def empty-document (->HamlDocument [] []))
 
-(defrecord Element [name id classes attrs text children])
-(defrecord Comment [text condition children])
-(defrecord Text [string])
+(defprotocol ContentNode
+  (update-children [this f & args]))
 
+(def vec-conj (fnil conj []))
 
+(extend-protocol ContentNode
+  hamelito.parse_tree.Element
+  (update-children [this f & args]
+    (apply update-in this [:children] f args)))
 
+(defn push-node
+  [nodes level node]
+  (if (< 0 level)
+    (let [fixed  (butlast nodes)
+          next   (last nodes)]
+      (if-not (satisfies? ContentNode next)
+        (throw (ex-info (format "Node '%s' does not support any content" (type next))
+                        {:current node
+                         :node next}))
+        (conj (vec fixed)
+              (update-children next push-node (dec level) node))))
+    (vec-conj nodes node)))
 
-
+(defn add-node
+  [haml-document level node]
+  (update-in haml-document [:elements] push-node level node))
 
 
 ;;;; helpers
@@ -49,7 +68,8 @@
 (def doctype-value     (>> (sym* \space)
                            (<+> (many (anything-but \newline)))))
 (def doctype           (bind [_     doctype-def
-                              value (optional doctype-value)]
+                              value (optional doctype-value)
+                              _     (modify-state update-in [:doctypes] conj (map->Doctype {:value (or value :default)}))]
                              (return {:doctype (or value :default)})))
 (def doctypes          (many (lexeme doctype)))
 
@@ -115,7 +135,7 @@
                               c1 (many class)
                               id (optional id)
                               c2 (many class)]
-                             (return {:element el
+                             (return {:name el
                                       :id id
                                       :classes (into #{} (concat c1 c2))})))
 
@@ -136,10 +156,11 @@
                               at  (optional attributes)
                               cl  (optional (token* "/"))
                               ic  (optional inline-content)]
-                             (return (merge tag
-                                            {:attributes (into {} at)
-                                             :self-close? (boolean cl)
-                                             :inline-content ic}))))
+                             (return (map->Element
+                                      (merge tag
+                                             {:attributes (into {} at)
+                                              :self-close? (boolean cl)
+                                              :inline-content ic})))))
 
 (def comment-cond      (brackets (many1 identifier)))
 
@@ -148,16 +169,18 @@
                               c      (optional text)]
                              (return (->Comment c cc))))
 
-(def nested-content    (<+> (anything-but \space)
-                            (many (anything-but \newline))))
+(def nested-content    (bind [text (<+> (anything-but \space)
+                                        (many (anything-but \newline)))]
+                             (return (map->Text {:text text}))))
 
 
 (def indent            (<*> space space))
 
 (def tag-line          (bind [level   (many indent)
-                              content (<|> tag nested-content)]
+                              node (<|> tag nested-content)
+                              _       (modify-state add-node (count level) node)]
                              (return {:level (count level)
-                                      :content content})))
+                                      :content node})))
 
 (def line              (>> vspace (optional tag-line)))
 
@@ -177,7 +200,7 @@
 
 (defn parse-haml
   [char-seq]
-  (let [parse-res (parse start char-seq)]
+  (let [parse-res (parse start char-seq nil empty-document)]
     (if (parse-succeded? parse-res)
       parse-res
       (throw (ex-info "HAML parsing failed"

@@ -26,7 +26,7 @@
   [haml-source]
   (let [char-seq  (char-seq haml-source)
         parse-res (parsing/parse-haml char-seq)]
-    (hamelito.hiccup/to-hiccup parse-res)))
+    (hamelito.hiccup/to-hiccup (:user parse-res))))
 
 (defn html
   [haml-source]

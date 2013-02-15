@@ -124,6 +124,8 @@
   "%div(   \nabc='def'\n  cde='fgh'\n\n   )"
   "<div abc=\"def\" cde=\"fgh\"></div>"
 
+  ;"%div(a=b)\n  %div(c=d)"
+  ;"<div a=\"b\"><div c=\"d\"></div></div>"
   )
 
 (defhtmltest ruby-attributes
