@@ -4,6 +4,21 @@
   (:use [blancas.kern.core]
         [blancas.kern.lexer.basic]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Parse Tree
+
+(defrecord HamlDocument [doctypes elements])
+
+(defrecord Element [name id classes attrs text children])
+(defrecord Comment [text condition children])
+(defrecord Text [string])
+
+
+
+
+
+
+
 ;;;; helpers
 
 (defn quoted
@@ -22,7 +37,7 @@
 
 (def identifier2        (<|> alpha-num (sym* \-) (sym* \_)))
 
-(def vspace            (many new-line*))
+(def vspace             (many new-line*))
 
 (defn prefixed-identifier
   [prefix]
@@ -86,51 +101,75 @@
 (def attributes        (<|> html-attributes ruby-attributes))
 
 
-;; tag
+;;;; element
 
 (def element           (prefixed-identifier "%"))
 (def id                (prefixed-identifier "#"))
 (def class             (prefixed-identifier "."))
 
-(def tag               (bind [el (optional element)
+(def text              (<+> (many (anything-but \newline))))
+
+(def inline-content    (>> (sym* \space) text))
+
+(def tag-element       (bind [el element
                               c1 (many class)
                               id (optional id)
-                              c2 (many class)
-                              at (optional attributes)
-                              cl (optional (token* "/"))]
-                             (return (when (or el
-                                               id
-                                               (not-empty c1)
-                                               (not-empty c2))
-                                       {:element el
-                                        :id id
-                                        :classes (into #{} (concat c1 c2))
-                                        :self-close? (boolean cl)
-                                        :attributes (into {} at)}))))
+                              c2 (many class)]
+                             (return {:element el
+                                      :id id
+                                      :classes (into #{} (concat c1 c2))})))
 
-(def text              (<+> (many1 (anything-but \newline))))
+(def class-element     (bind [c1 (many1 class)
+                              id (optional id)
+                              c2 (many class)]
+                             (return {:id id
+                                      :classes (into #{} (concat c1 c2))})))
 
-(def inline-content    (>> (optional (sym* \space)) text))
+(def id-element        (bind [id id
+                              cl (many class)]
+                             (return  {:id id
+                                       :classes (into #{} cl)})))
+
+(def tag-definition    (<|> tag-element class-element id-element))
+
+(def tag               (bind [tag tag-definition
+                              at  (optional attributes)
+                              cl  (optional (token* "/"))
+                              ic  (optional inline-content)]
+                             (return (merge tag
+                                            {:attributes (into {} at)
+                                             :self-close? (boolean cl)
+                                             :inline-content ic}))))
+
+(def comment-cond      (brackets (many1 identifier)))
+
+(def html-comment      (bind [_      (sym \/)
+                              cc     (optional comment-cond)
+                              c      (optional text)]
+                             (return (->Comment c cc))))
+
+(def nested-content    (<+> (satisfy #(and (not= % \space)
+                                           (not= % \newline)))
+                            (many (anything-but \newline))))
+
 
 (def indent            (<*> space space))
 
 (def tag-line          (bind [level   (many indent)
-                              t       tag
-                              content (optional inline-content)]
+                              content (<|> tag nested-content)]
                              (return {:level (count level)
-                                      :tag t
                                       :content content})))
 
-(def line              (>> vspace (<|> eof tag-line )))
+(def line              (>> vspace (optional tag-line)))
 
-(def lines             (many line))
+(def lines             (many1 line))
 
 (def haml              (bind [ds doctypes
                               ls lines]
                              (return {:doctypes ds
                                       :content ls})))
 
-(def start             (>> trim haml))
+(def start             (>> trim (<< haml eof)))
 
 (defn- parse-succeded?
   [res]

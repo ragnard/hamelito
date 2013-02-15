@@ -38,3 +38,12 @@
   (let [char-seq  (char-seq haml-source)
         parse-res (parsing/parse-haml char-seq)]
     (hamelito.enlive/node-seq parse-res)))
+
+(defn- ^java.io.InputStream resource-stream
+  [path]
+  (.. clojure.lang.RT baseLoader (getResourceAsStream path)))
+
+(defn haml-resource
+  [path]
+  (with-open [stream (resource-stream path)]
+    (into [] (enlive-node-seq (io/reader stream)))))

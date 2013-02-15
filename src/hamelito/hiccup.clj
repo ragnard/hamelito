@@ -17,19 +17,20 @@
                   (str "." (string/join "." classes))))))
 
 (defn tag-data->hiccup
-  [{:keys [tag content]}]
-  (if tag
-    (let [attributes (:attributes tag)]
-      (cond-> [(tag->hiccup tag)]
+  [data]
+  (cond
+   (map? data)    (let [attributes (:attributes data)
+                       content     (:inline-content data)]
+                   (cond-> [(tag->hiccup data)]
 
-              attributes
-              (conj attributes)
+                           attributes
+                           (conj attributes)
 
-              content
-              (conj content)))
-    content))
+                           content
+                           (conj content)))
+   (string? data) data))
 
-(defn push-content
+(defn apply-content
   [hiccup-data level content]
   (if (< 0 level)
     (let [fixed  (butlast hiccup-data)
@@ -45,10 +46,10 @@
 
 (defn- content->hiccup
   [{:keys [content]}]
-  (reduce (fn [res {:keys [level tag content] :as tag-data}]
-            (if tag-data
-              (push-content res level (tag-data->hiccup tag-data))
-              res))
+  (reduce (fn [hiccup-data {:keys [level content] :as data}]
+            (if data
+              (apply-content hiccup-data level (tag-data->hiccup content))
+              hiccup-data))
           []
           content))
 
@@ -67,8 +68,8 @@
   [parse-res]
   (let [value (:value parse-res)]
     (concat
-       (doctype->hiccup value)
-       (content->hiccup value))))
+     (doctype->hiccup value)
+     (content->hiccup value))))
 
 
 (comment

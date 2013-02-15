@@ -76,6 +76,11 @@
       (push-content 0 {:tag :a})
       (push-content 1 {:tag :b}))
 
+  (-> []
+      (push-content 0 {:tag :a})
+      (push-content 1 {:tag :b})
+      (push-content 1 "asdf"))
+
 
   (pprint  (-> []
                (push-content 0 [:html])
@@ -87,4 +92,6 @@
                (push-content 2 [:h1 {}  "Title 2"])
                (push-content 3 [:h1 {}  "Title 2"])
                (push-content 0 "Heeej")))
+
+  
   )

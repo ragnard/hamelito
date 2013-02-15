@@ -165,3 +165,26 @@
   "<!DOCTYPE html>\n<div>Blahonga</div>"
   
   )
+
+(comment
+  (defhtmltest html-comments
+
+    "/ This is a comment"
+    "<!-- This is a a comment -->"
+
+    "\n\n/ This is a comment   \n\n"
+    "<!-- This is a a comment -->"
+    
+    "%div\n  / comment\n  Content"
+    "%div\n  <!-- comment -->\n  Content"
+
+    "/\n  %h1 Nested\n    %p Content"
+    "<!-- <h1>Nested<p>Content</p</h1> -->"
+    )
+
+  (defhtmltest conditional-comments
+
+    "/[if IE]\n  %p Noooo\n"
+    "<!--[if IE]><p>Noooo</p><![endif]-->"
+    
+    ))
