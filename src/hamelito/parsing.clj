@@ -148,8 +148,7 @@
                               c      (optional text)]
                              (return (->Comment c cc))))
 
-(def nested-content    (<+> (satisfy #(and (not= % \space)
-                                           (not= % \newline)))
+(def nested-content    (<+> (anything-but \space)
                             (many (anything-but \newline))))
 
 

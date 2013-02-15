@@ -37,7 +37,7 @@
           next   (last hiccup-data)]
       (if (vector? next)
         (conj (vec fixed)
-              (push-content next (dec level) content))
+              (apply-content next (dec level) content))
         (throw (ex-info "Missing parent for new element or content"
                         {:content content
                          :hiccup-data hiccup-data
