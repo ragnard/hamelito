@@ -52,7 +52,7 @@
   hamelito.parse_tree.Doctype
   (-to-hiccup [this]  (get doctype-map (:value this) nil))
   
-  hamelito.parse_tree.HamlDocument
+  hamelito.parse_tree.Document
   (-to-hiccup [this] (concat
                       (mapv -to-hiccup (:doctypes this))
                       (mapv -to-hiccup (:elements this)))))

@@ -8,7 +8,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Parse Tree
 
-(def empty-document (->HamlDocument [] []))
+(def empty-document (->Document [] []))
 
 (defprotocol ContentNode
   (update-children [this f args]))

@@ -5,7 +5,7 @@
 
 ;; node types
 
-(defrecord HamlDocument [doctypes elements])
+(defrecord Document [doctypes elements])
 (defrecord Doctype [value])
 (defrecord Text [text])
 (defrecord Element [name id classes attributes text children])

@@ -1,5 +1,7 @@
 # hamelito
 
+[![Build Status](https://travis-ci.org/ragnard/hamelito.png?branch=master)](https://travis-ci.org/ragnard/hamelito)
+
 > As the younger, distant cousin to [HAML](http://haml.info/), Hamelito
 > looks up to his handsome relative, but has different goals in life.
 
