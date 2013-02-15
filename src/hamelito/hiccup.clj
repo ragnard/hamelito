@@ -8,14 +8,15 @@
 (when (< (:minor *clojure-version*) 5)
   (use 'hamelito.util))
 
-
-(defprotocol ToHiccup
-  (-to-hiccup [this]))
-
-
 (defn- flat-conj
   [vec xs]
   (apply conj vec xs))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Hiccup Conversion
+
+(defprotocol ToHiccup
+  (-to-hiccup [this]))
 
 (defn element-tag
   [{:keys [name id classes]}]
@@ -39,7 +40,7 @@
               attributes
               (conj attributes)
 
-              inline-content
+              inline-content 
               (conj inline-content)
 
               children

@@ -37,7 +37,7 @@
   [haml-source]
   (let [char-seq  (char-seq haml-source)
         parse-res (parsing/parse-haml char-seq)]
-    (hamelito.enlive/node-seq parse-res)))
+    (hamelito.enlive/node-seq (:user parse-res))))
 
 (defn- ^java.io.InputStream resource-stream
   [path]
