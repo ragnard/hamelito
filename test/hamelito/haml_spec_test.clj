@@ -11,11 +11,11 @@
 (def included-categories
   #{"basic Haml tags and CSS"
     ;; "boolean attributes"
-    ;; "conditional comments"
+    "conditional comments"
     ;; "headers"
     ;; "HTML escaping"
     ;; "internal filters"
-    ;; "markup comments"
+    "markup comments"
     ;; "Ruby-style interpolation"
     ;; "silent comments"
     "tags with HTML-style attributes"

@@ -1,5 +1,6 @@
 (ns hamelito.enlive
-  (:require [clojure.string  :as string])
+  (:require [hamelito.doctypes :as doctypes]
+            [clojure.string  :as string])
   (:use [hamelito.parse-tree]))
 
 ;; bring in the cond->
@@ -45,19 +46,20 @@
   hamelito.parse_tree.Text
   (-enlive-node [this] (:text this))
 
+  hamelito.parse_tree.Comment
+  (-enlive-node [this] (concat ["<!--"]
+                               (when (:text this) [(:text this)])
+                               (mapv -enlive-node (:children this))
+                               [" -->"]))
+  
   hamelito.parse_tree.Doctype
-  (-enlive-node [this])
+  (-enlive-node [this] (doctypes/lookup-doctype :html5 (:value this)))
 
   hamelito.parse_tree.Document
   (-enlive-node [this]
     (concat (map -enlive-node (:doctypes this))
             (map -enlive-node (:elements this)))))
 
-
-
 (defn node-seq
   [parse-tree]
   (-enlive-node parse-tree))
-
-
-

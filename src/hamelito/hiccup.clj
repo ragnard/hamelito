@@ -1,10 +1,11 @@
 (ns hamelito.hiccup
-  (:require [hiccup.core     :as h]
-            [hiccup.page     :as hp]
-            [clojure.string  :as string])
+  (:require [hamelito.doctypes :as doctypes]
+            [hiccup.core       :as h]
+            [hiccup.page       :as hp]
+            [clojure.string    :as string])
   (:use [hamelito.parse-tree]))
 
-;; bring in cond-> if necessary
+;; bring in the cond->
 (when (< (:minor *clojure-version*) 5)
   (use 'hamelito.util))
 
@@ -26,31 +27,34 @@
                 (when-not (empty? classes)
                   (str "." (string/join "." classes))))))
 
-(def ^:private doctype-map
-  {:default "<!DOCTYPE html>\n"
-   "Strict" "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"})
+(defn element->hiccup
+  [{:keys [attributes inline-content children] :as element}]
+  (cond-> [(element-tag element)]
 
+          attributes
+          (conj attributes)
+
+          inline-content 
+          (conj inline-content)
+
+          children
+          (flat-conj (mapv -to-hiccup children))))
 
 (extend-protocol ToHiccup
   hamelito.parse_tree.Element
-  (-to-hiccup [this]
-    (let [{:keys [attributes inline-content children]} this]
-      (cond-> [(element-tag this)]
-
-              attributes
-              (conj attributes)
-
-              inline-content 
-              (conj inline-content)
-
-              children
-              (flat-conj (mapv -to-hiccup children)))))
+  (-to-hiccup [this] (element->hiccup this))
 
   hamelito.parse_tree.Text
   (-to-hiccup [this]  (:text this))
 
+  hamelito.parse_tree.Comment
+  (-to-hiccup [this]  (concat ["<!--"]
+                              (when (:text this) [(:text this)])
+                              (mapv -to-hiccup (:children this))
+                              [" -->"]))
+  
   hamelito.parse_tree.Doctype
-  (-to-hiccup [this]  (get doctype-map (:value this) nil))
+  (-to-hiccup [this]  (doctypes/lookup-doctype :html5 (:value this)))
   
   hamelito.parse_tree.Document
   (-to-hiccup [this] (concat

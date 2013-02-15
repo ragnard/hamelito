@@ -18,7 +18,11 @@
 (extend-protocol ContentNode
   hamelito.parse_tree.Element
   (update-children [this f args]
-    (apply update-in this [:children] f args)))
+    (apply update-in this [:children] f args))
+
+  hamelito.parse_tree.Comment
+  (update-children [this f args]
+    (apply update-in this [:children] f args))  )
 
 (defn push-node
   [nodes level node]
@@ -164,20 +168,23 @@
 
 (def comment-cond      (brackets (many1 identifier)))
 
-(def html-comment      (bind [_      (sym \/)
-                              cc     (optional comment-cond)
-                              c      (optional text)]
-                             (return (->Comment c cc))))
+(def html-comment      (bind [_         (sym* \/)
+                              condition (optional comment-cond)
+                              text      (optional text)]
+                             (return (map->Comment
+                                      {:text text
+                                       :condition condition}))))
 
 (def nested-content    (bind [text (<+> (anything-but \space)
                                         (many (anything-but \newline)))]
-                             (return (map->Text {:text text}))))
+                             (return (map->Text
+                                      {:text text}))))
 
 
 (def indent            (<*> space space))
 
 (def tag-line          (bind [level   (many indent)
-                              node (<|> tag nested-content)
+                              node (<|> tag html-comment nested-content)
                               _       (modify-state add-node (count level) node)]
                              (return {:level (count level)
                                       :content node})))
@@ -225,3 +232,5 @@
   (pprint (parse-haml "%div{ :blah => 'honga'}\n  %div\n    %p\n      text\n\n"))
 
   )
+
+
