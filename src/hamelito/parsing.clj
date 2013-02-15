@@ -11,13 +11,13 @@
 (def empty-document (->HamlDocument [] []))
 
 (defprotocol ContentNode
-  (update-children [this f & args]))
+  (update-children [this f args]))
 
 (def vec-conj (fnil conj []))
 
 (extend-protocol ContentNode
   hamelito.parse_tree.Element
-  (update-children [this f & args]
+  (update-children [this f args]
     (apply update-in this [:children] f args)))
 
 (defn push-node
@@ -30,7 +30,7 @@
                         {:current node
                          :node next}))
         (conj (vec fixed)
-              (update-children next push-node (dec level) node))))
+              (update-children next push-node [(dec level) node]))))
     (vec-conj nodes node)))
 
 (defn add-node
