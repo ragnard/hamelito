@@ -2,7 +2,7 @@
   (:require [cheshire.core   :as json]
             [clojure.string  :as string]
             [clojure.java.io :as io]
-            [hamelito.parsing :as haml])
+            [hamelito.parser :as parser])
   (:use [clojure.test :only [deftest is testing]]))
 
 (def haml-spec (json/parse-stream
@@ -46,7 +46,7 @@
   (let [haml (test-data "haml")
         html (test-data "html")]
     `(testing ~description
-       (let [res# (haml/parse-haml ~haml)]
+       (let [res# (parser/parse-haml ~haml)]
          (is (parse-succeded? res#)
              (str "Unable to parse input: \n" ~haml "\n\n"))))))
 

@@ -168,25 +168,28 @@
   
   )
 
-(defhtmltest html-comments
-
-  "/ This is a comment"
-  "<!-- This is a comment -->"
-
-  "\n\n/ This is a comment   \n\n"
-  "<!-- This is a comment -->"
-  
-  "%div\n  / comment\n  Content"
-  "<div><!-- comment -->Content</div>"
-
-  "/\n  %h1 Nested\n    %p Content"
-  "<!-- <h1>Nested<p>Content</p></h1> -->"
-  )
-
 (comment
-  (defhtmltest conditional-comments
+  (defhtmltest html-comments
 
-    "/[if IE]\n  %p Noooo\n"
-    "<!--[if IE]><p>Noooo</p><![endif]-->"
+    "/ This is a comment"
+    "<!-- This is a comment -->"
+
+    "\n\n/ This is a comment   \n\n"
+    "<!-- This is a comment -->"
     
+    "%div\n  / comment\n  Content"
+    "<div><!-- comment -->Content</div>"
+
+    "/\n  %h1 Nested\n    %p Content"
+    "<!-- <h1>Nested<p>Content</p></h1> -->"
     ))
+
+(defhtmltest conditional-comments
+
+  "/[if IE lte 10]"
+  "<!--[if IE lte 10]><![endif]-->"
+  
+  "/[if IE]\n  %p Noooo\n"
+  "<!--[if IE]><p>Noooo</p><![endif]-->"
+  
+  )

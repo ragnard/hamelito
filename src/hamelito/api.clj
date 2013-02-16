@@ -1,7 +1,7 @@
 (ns hamelito.api
   (:require [hamelito.enlive]
             [hamelito.hiccup]
-            [hamelito.parsing     :as parsing]
+            [hamelito.parser      :as parser]
             [hiccup.core          :as hiccup]
             [clojure.java.io      :as io]))
 
@@ -25,7 +25,7 @@
 (defn hiccup
   [haml-source]
   (let [char-seq  (char-seq haml-source)
-        parse-res (parsing/parse-haml char-seq)]
+        parse-res (parser/parse-haml char-seq)]
     (hamelito.hiccup/to-hiccup (:user parse-res))))
 
 (defn html
@@ -36,7 +36,7 @@
 (defn enlive-node-seq
   [haml-source]
   (let [char-seq  (char-seq haml-source)
-        parse-res (parsing/parse-haml char-seq)]
+        parse-res (parser/parse-haml char-seq)]
     (hamelito.enlive/node-seq (:user parse-res))))
 
 (defn- ^java.io.InputStream resource-stream

@@ -1,9 +1,9 @@
-(ns hamelito.parsing
+(ns hamelito.parser
   (:refer-clojure :exclude [class])
   (:require [clojure.string :as string])
   (:use [hamelito.parse-tree]
-        [blancas.kern.core]
-        [blancas.kern.lexer.basic]))
+        [hamelito.lexer]
+        [blancas.kern.core]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Parse Tree
@@ -22,7 +22,7 @@
 
   hamelito.parse_tree.Comment
   (update-children [this f args]
-    (apply update-in this [:children] f args))  )
+    (apply update-in this [:children] f args)))
 
 (defn push-node
   [nodes level node]
@@ -37,9 +37,13 @@
               (update-children next push-node [(dec level) node]))))
     (vec-conj nodes node)))
 
+(defn add-doctype
+  [document doctype]
+  (update-in document [:doctypes] conj doctype))
+
 (defn add-node
-  [haml-document level node]
-  (update-in haml-document [:elements] push-node level node))
+  [document level node]
+  (update-in document [:elements] push-node level node))
 
 
 ;;;; helpers
@@ -62,6 +66,10 @@
 
 (def vspace             (many new-line*))
 
+(defn parens*
+  [p]
+  )
+
 (defn prefixed-identifier
   [prefix]
   (>> (token* prefix)
@@ -73,9 +81,9 @@
                            (<+> (many (anything-but \newline)))))
 (def doctype           (bind [_     doctype-def
                               value (optional doctype-value)
-                              _     (modify-state update-in [:doctypes] conj (map->Doctype {:value (or value :default)}))]
+                              _     (modify-state add-doctype (map->Doctype {:value (or value :default)}))]
                              (return {:doctype (or value :default)})))
-(def doctypes          (many (lexeme doctype)))
+(def doctypes          (sep-end-by vspace doctype))
 
 ;;;; attributes
 
@@ -83,44 +91,48 @@
   [char]
   (quoted char (<+> (many (anything-but char)))))
 
+(defn trim-ws
+  [p]
+  (<< p (many white-space)))
+
 ;; html-style attributes
 
-(def html-name         (lexeme (<|> (<+> (many1 identifier2))
-                                    (quoted-any \")
-                                    (quoted-any \'))))
+(def html-name         (<|> (<+> (many1 identifier2))
+                            (quoted-any \")
+                            (quoted-any \')))
 
-(def html-value        (lexeme (<|> (<+> (many1 identifier2))
-                                    (quoted-any \")
-                                    (quoted-any \'))))
+(def html-value        (<|> (<+> (many1 identifier2))
+                            (quoted-any \")
+                            (quoted-any \')))
 
-(def html-attr-pair    (bind [name  html-name
+(def html-attr-pair    (bind [name  (trim-ws html-name)
                               _     (sym* \=)
-                              value html-value]
+                              value (trim-ws html-value)]
                              (return [name value])))
 
-(def html-attributes   (parens (many html-attr-pair)))
+(def html-attributes   (parens (skip-ws (many html-attr-pair))))
 
 
 ;; ruby-style attributes
 
-(def ruby-keyword      (lexeme (bind [_      (sym \:)
-                                      name   (<+> (many1 identifier2))]
-                                     (return (keyword name)))))
+(def ruby-keyword      (bind [_      (sym \:)
+                              name   (<+> (many1 identifier2))]
+                             (return (keyword name))))
 
-(def ruby-name         (lexeme (<|> ruby-keyword
-                                    (quoted-any \")
-                                    (quoted-any \'))))
+(def ruby-name         (<|> ruby-keyword
+                            (quoted-any \")
+                            (quoted-any \')))
 
-(def ruby-value        (lexeme (<|> (<+> (many1 identifier2))
-                                    (quoted-any \")
-                                    (quoted-any \'))))
+(def ruby-value        (<|> (<+> (many1 identifier2))
+                            (quoted-any \")
+                            (quoted-any \')))
 
-(def ruby-attr-pair    (bind [name   ruby-name
-                              _      (token "=>")
-                              value  ruby-value]
+(def ruby-attr-pair    (bind [name   (trim-ws ruby-name)
+                              _      (trim-ws (token "=>"))
+                              value  (trim-ws ruby-value)]
                              (return [name value])))
 
-(def ruby-attributes   (braces (comma-sep ruby-attr-pair)))
+(def ruby-attributes   (braces (skip-ws (sep-by (trim-ws (sym* \,)) ruby-attr-pair))))
 
 (def attributes        (<|> html-attributes ruby-attributes))
 
@@ -166,7 +178,7 @@
                                               :self-close? (boolean cl)
                                               :inline-content ic})))))
 
-(def comment-cond      (brackets (many1 identifier)))
+(def comment-cond      (brackets (<+> (many (anything-but \])))))
 
 (def html-comment      (bind [_         (sym* \/)
                               condition (optional comment-cond)
@@ -183,22 +195,20 @@
 
 (def indent            (<*> space space))
 
-(def tag-line          (bind [level   (many indent)
-                              node (<|> tag html-comment nested-content)
-                              _       (modify-state add-node (count level) node)]
+(def tag-line          (bind [level (many indent)
+                              node  (<|> tag html-comment nested-content)
+                              _     (modify-state add-node (count level) node)]
                              (return {:level (count level)
                                       :content node})))
 
-(def line              (>> vspace (optional tag-line)))
-
-(def lines             (many1 line))
+(def lines             (sep-end-by vspace tag-line))
 
 (def haml              (bind [ds doctypes
                               ls lines]
                              (return {:doctypes ds
                                       :content ls})))
 
-(def start             (>> trim (<< haml eof)))
+(def start             (>> vspace (<< haml eof)))
 
 (defn- parse-succeded?
   [res]

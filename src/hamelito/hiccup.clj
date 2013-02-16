@@ -40,21 +40,30 @@
           children
           (flat-conj (mapv -to-hiccup children))))
 
+(defn comment->hiccup
+  [{:keys [text condition children]}]
+  (concat ["<!--"]
+          (when condition
+            ["[" condition "]>"])
+          (when text
+            [text])
+          (mapv -to-hiccup children)
+          (when condition
+            ["<![endif]"])
+          ["-->"]))
+
 (extend-protocol ToHiccup
   hamelito.parse_tree.Element
   (-to-hiccup [this] (element->hiccup this))
 
   hamelito.parse_tree.Text
-  (-to-hiccup [this]  (:text this))
+  (-to-hiccup [this] (:text this))
 
   hamelito.parse_tree.Comment
-  (-to-hiccup [this]  (concat ["<!--"]
-                              (when (:text this) [(:text this)])
-                              (mapv -to-hiccup (:children this))
-                              [" -->"]))
+  (-to-hiccup [this] (comment->hiccup this))
   
   hamelito.parse_tree.Doctype
-  (-to-hiccup [this]  (doctypes/lookup-doctype :html5 (:value this)))
+  (-to-hiccup [this] (doctypes/lookup-doctype :html5 (:value this)))
   
   hamelito.parse_tree.Document
   (-to-hiccup [this] (concat
