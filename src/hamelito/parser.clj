@@ -2,7 +2,6 @@
   (:refer-clojure :exclude [class])
   (:require [clojure.string :as string])
   (:use [hamelito.parse-tree]
-        [hamelito.lexer]
         [blancas.kern.core]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -70,6 +69,10 @@
   [p]
   (between (sym* \() (sym* \)) p))
 
+(defn brackets*
+  [p]
+  (between (sym* \[) (sym* \]) p))
+
 (defn braces*
   [p]
   (between (sym* \{) (sym* \}) p))
@@ -118,7 +121,7 @@
 
 ;; ruby-style attributes
 
-(def ruby-keyword      (bind [_      (sym \:)
+(def ruby-keyword      (bind [_      (sym* \:)
                               name   (<+> (many1 identifier2))]
                              (return (keyword name))))
 
@@ -131,7 +134,7 @@
                             (quoted-any \')))
 
 (def ruby-attr-pair    (bind [name   (trim-ws ruby-name)
-                              _      (trim-ws (token "=>"))
+                              _      (trim-ws (token* "=>"))
                               value  (trim-ws ruby-value)]
                              (return [name value])))
 
@@ -183,7 +186,7 @@
 
 ;;;; Comments
 
-(def comment-cond      (brackets (<+> (many (anything-but \])))))
+(def comment-cond      (brackets* (<+> (many (anything-but \])))))
 
 (def html-comment      (bind [_         (sym* \/)
                               condition (optional comment-cond)
