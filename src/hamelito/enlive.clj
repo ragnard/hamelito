@@ -33,7 +33,7 @@
             attributes
             (update-in [:attrs] merge attributes)
 
-            inline-content
+            (not (string/blank? inline-content))
             (update-in [:content] vec-conj inline-content)
 
             children

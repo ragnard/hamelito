@@ -154,14 +154,11 @@
   "%div{   :abc=>'def'\n , \n :cde=>'fgh' \n\n  }"
   "<div abc=\"def\" cde=\"fgh\"></div>"
 
-  "%div{:a=\"b\"} Hello"
+  "%div{:a=>\"b\"} Hello"
   "<div a=\"b\">Hello</div>"
   
-  "%div{:a=\"b\"}\n  %div(c=d)"
-  "<div a=\"b\"><div c=\"d\"></div></div>"
-
-  
-  )
+  "%div{:a=>\"b\"}\n  %div(c=d)"
+  "<div a=\"b\"><div c=\"d\"></div></div>")
 
 (defhtmltest doctypes
 
@@ -175,9 +172,7 @@
   "<!DOCTYPE html>\n<div>Blahonga</div>"
 
   "\n\n!!!\n\n%div Blahonga\n\n"
-  "<!DOCTYPE html>\n<div>Blahonga</div>"
-  
-  )
+  "<!DOCTYPE html>\n<div>Blahonga</div>")
 
 (comment
   (defhtmltest html-comments
@@ -200,7 +195,7 @@
   "/[if IE lte 10]"
   "<!--[if IE lte 10]><![endif]-->"
   
-  "/[if IE]\n  %p Noooo\n"
-  "<!--[if IE]><p>Noooo</p><![endif]-->"
+  "/[if IE]\n  %p Go away\n"
+  "<!--[if IE]><p>Go away</p><![endif]-->"
   
   )

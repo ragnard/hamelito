@@ -34,7 +34,7 @@
           attributes
           (conj attributes)
 
-          inline-content 
+          (not (string/blank? inline-content)) 
           (conj inline-content)
 
           children

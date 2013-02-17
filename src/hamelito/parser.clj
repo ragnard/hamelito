@@ -66,6 +66,14 @@
 
 (def vspace             (many new-line*))
 
+(defn parens*
+  [p]
+  (between (sym* \() (sym* \)) p))
+
+(defn braces*
+  [p]
+  (between (sym* \{) (sym* \}) p))
+
 (defn prefixed-identifier
   [prefix]
   (>> (token* prefix)
@@ -106,8 +114,7 @@
                               value (trim-ws html-value)]
                              (return [name value])))
 
-(def html-attributes   (parens (skip-ws (many html-attr-pair))))
-
+(def html-attributes   (parens* (skip-ws (many html-attr-pair))))
 
 ;; ruby-style attributes
 
@@ -128,7 +135,7 @@
                               value  (trim-ws ruby-value)]
                              (return [name value])))
 
-(def ruby-attributes   (braces (skip-ws (sep-by (trim-ws (sym* \,)) ruby-attr-pair))))
+(def ruby-attributes   (braces* (skip-ws (sep-by (trim-ws (sym* \,)) ruby-attr-pair))))
 
 (def attributes        (<|> html-attributes ruby-attributes))
 
@@ -141,7 +148,7 @@
 
 (def text              (<+> (many (anything-but \newline))))
 
-(def inline-content    (>> (sym* \space) text))
+(def inline-content    text)
 
 (def tag-element       (bind [el element
                               c1 (many class)
@@ -172,7 +179,7 @@
                                       (merge tag
                                              {:attributes (into {} at)
                                               :self-close? (boolean cl)
-                                              :inline-content ic})))))
+                                              :inline-content (string/trim ic)})))))
 
 ;;;; Comments
 
