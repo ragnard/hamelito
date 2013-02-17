@@ -37,20 +37,29 @@
             (update-in [:content] vec-conj inline-content)
 
             children
-            (update-in [:content] flat-conj (map -enlive-node children)))))
+            (update-in [:content] flat-conj (mapcat -enlive-node children)))))
+
+(defn comment->enlive-node
+  [{:keys [text condition children]}]
+  (concat (if condition
+            ["<!--[" condition "]>"]
+            ["<!-- "])
+          (when text
+            [text])
+          (mapcat -enlive-node children)
+          (if condition
+            ["<![endif]-->"]
+            [" -->"])))
 
 (extend-protocol ToEnliveNode
   hamelito.parse_tree.Element
-  (-enlive-node [this] (element->enlive-node this))
+  (-enlive-node [this] [(element->enlive-node this)])
 
   hamelito.parse_tree.Text
   (-enlive-node [this] (:text this))
 
   hamelito.parse_tree.Comment
-  (-enlive-node [this] (concat ["<!--"]
-                               (when (:text this) [(:text this)])
-                               (mapv -enlive-node (:children this))
-                               [" -->"]))
+  (-enlive-node [this] (comment->enlive-node this))
   
   hamelito.parse_tree.Doctype
   (-enlive-node [this] (doctypes/lookup-doctype :html5 (:value this)))
@@ -58,7 +67,7 @@
   hamelito.parse_tree.Document
   (-enlive-node [this]
     (concat (map -enlive-node (:doctypes this))
-            (map -enlive-node (:elements this)))))
+            (mapcat -enlive-node (:elements this)))))
 
 (defn node-seq
   [parse-tree]

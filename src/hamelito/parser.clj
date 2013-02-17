@@ -192,7 +192,7 @@
                               condition (optional comment-cond)
                               text      (optional text)]
                              (return (map->Comment
-                                      {:text text
+                                      {:text (string/trim text)
                                        :condition condition}))))
 
 ;;;; Text Content

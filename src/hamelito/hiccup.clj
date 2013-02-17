@@ -42,15 +42,15 @@
 
 (defn comment->hiccup
   [{:keys [text condition children]}]
-  (concat ["<!--"]
-          (when condition
-            ["[" condition "]>"])
+  (concat (if condition
+            ["<!--[" condition "]>"]
+            ["<!-- "])
           (when text
             [text])
           (mapv -to-hiccup children)
-          (when condition
-            ["<![endif]"])
-          ["-->"]))
+          (if condition
+            ["<![endif]-->"]
+            [" -->"])))
 
 (extend-protocol ToHiccup
   hamelito.parse_tree.Element
