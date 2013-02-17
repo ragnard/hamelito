@@ -124,8 +124,11 @@
   "%div(   \nabc='def'\n  cde='fgh'\n\n   )"
   "<div abc=\"def\" cde=\"fgh\"></div>"
 
-  ;"%div(a=b)\n  %div(c=d)"
-  ;"<div a=\"b\"><div c=\"d\"></div></div>"
+  "%div(a=b) Hello"
+  "<div a=\"b\">Hello</div>"
+  
+  "%div(a=b)\n  %div(c=d)"
+  "<div a=\"b\"><div c=\"d\"></div></div>"
   )
 
 (defhtmltest ruby-attributes
@@ -150,6 +153,14 @@
 
   "%div{   :abc=>'def'\n , \n :cde=>'fgh' \n\n  }"
   "<div abc=\"def\" cde=\"fgh\"></div>"
+
+  "%div{:a=\"b\"} Hello"
+  "<div a=\"b\">Hello</div>"
+  
+  "%div{:a=\"b\"}\n  %div(c=d)"
+  "<div a=\"b\"><div c=\"d\"></div></div>"
+
+  
   )
 
 (defhtmltest doctypes

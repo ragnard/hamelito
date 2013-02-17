@@ -46,6 +46,10 @@
   (update-in document [:elements] push-node level node))
 
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; HAML(ish) parser
+
 ;;;; helpers
 
 (defn quoted
@@ -56,19 +60,11 @@
   [char]
   (satisfy #(not= % char)))
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; HAML(ish) parser
-
 ;;;; general
 
 (def identifier2        (<|> alpha-num (sym* \-) (sym* \_)))
 
 (def vspace             (many new-line*))
-
-(defn parens*
-  [p]
-  )
 
 (defn prefixed-identifier
   [prefix]
@@ -178,6 +174,8 @@
                                               :self-close? (boolean cl)
                                               :inline-content ic})))))
 
+;;;; Comments
+
 (def comment-cond      (brackets (<+> (many (anything-but \])))))
 
 (def html-comment      (bind [_         (sym* \/)
@@ -186,6 +184,8 @@
                              (return (map->Comment
                                       {:text text
                                        :condition condition}))))
+
+;;;; Text Content
 
 (def nested-content    (bind [text (<+> (anything-but \space)
                                         (many (anything-but \newline)))]
