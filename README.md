@@ -33,6 +33,9 @@ Things that should work:
     - Single and double quoted values
   - HTML style: `%a(href='www.xkcd.org')`
     - Unquoted, single and double quoted values
+- Comments
+  - Html
+  - Conditional
 - Doctypes 
   - Only `!!!` is currently supported an will yield HTML5 doctype
 
@@ -43,8 +46,6 @@ Things todo/investigate:
 - Be more strict with valid identifiers when parsing
 - Escaping
 - Comments
-  - Html
-  - Conditional
   - Silent
 - Whitespace handling/preservation
 - More doctypes, especially !!! XML with encoding
@@ -61,24 +62,29 @@ Things todo/investigate:
 The main public API is in `hamelito.api`;
 
 ```clojure
-(require '[hamelito.api :as h])
+(require '[hamelito.api :as haml])
 
 ;; The html function takes a HAML source and returns an HTML string
 
-(h/html "%h1 Hola!")
-; => "<h1>Hola!</h1>"
+(haml/html "%h1 Hola!")
+;; => "<h1>Hola!</h1>"
 
 ;; A HAML source is anyhting that implements the CharSeq protocol, ie.
 ;; can provide seq of chars, for example Reader:
 
-(h/html (java.io.StringReader. "%h1 Hola!"))
-; => "<h1>Hola!</h1>"
+(haml/html (java.io.StringReader. "%h1 Hola!"))
+;; => "<h1>Hola!</h1>"
 
 ;; Hamelito parses HAML into Hiccup data and leans on Hiccup to do the
 ;; rendering. You can also ask for the Hicucp data:
 
-(h/hiccup "%h1 Hola")
-; => ([:h1 {} "Hola"])
+(haml/hiccup "%h1 Hola")
+;; => ([:h1 "Hola"])
+
+;; Hamelito can also return enlive data:
+
+(haml/enlive-node-seq "%h1 Hola")
+;; => ({:content ["Hola"], :attrs {}, :tag :h1})
 ```
 
 ### enlive
