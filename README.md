@@ -89,6 +89,32 @@ The main public API is in `hamelito.api`;
 
 ### enlive
 
+As of version 1.1.1, enlive supports pluggable parsers. The `hamelito.api/enlive-parser` 
+function implements the pluggable parser interface, and can be used like so:
+
+```clojure
+(require '[net.cgrand.enlive-html :as enlive])
+(require '[hamelito.api :as haml])
+
+(in-ns 'test)
+
+;; To use HAML for all templates in the current namespace:
+
+(enlive/set-ns-parser! haml/enlive-parser)
+
+(deftemplate haml-template "template.haml"
+  [])
+
+
+;; To use HAML for a specific template/snippet:
+
+(deftemplate haml-template {:parser haml/enlive-parser}
+  (java.io.StringReader. "%h1 Hello")
+  [])
+
+```
+
+
 A `haml-resource` utility function is provided to simplify using HAML
 templates on the classpath with enlive:
 
