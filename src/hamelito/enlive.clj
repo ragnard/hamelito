@@ -20,38 +20,36 @@
   (-enlive-node [this]))
 
 (defn element->enlive-node
-  [{:keys [name id classes attributes inline-content children]} element]
-  (cond-> {:tag (or (keyword name) :div)}
+  [element]
+  (let [{:keys [name id classes attributes inline-content children]} element]
+    (cond-> {:tag (or (keyword name) :div)}
 
-          id
-          (assoc-in [:attrs :id] id)
+            id
+            (assoc-in [:attrs :id] id)
 
-          (not (empty? classes))
-          (assoc-in [:attrs :class] (string/join " " classes))
+            (not (empty? classes))
+            (assoc-in [:attrs :class] (string/join " " classes))
 
-          attributes
-          (update-in [:attrs] merge attributes)
+            attributes
+            (update-in [:attrs] merge attributes)
 
-          (not (string/blank? inline-content))
-          (update-in [:content] vec-conj inline-content)
+            (not (string/blank? inline-content))
+            (update-in [:content] vec-conj inline-content)
 
-          children
-          (update-in [:content] flat-conj (mapcat -enlive-node children))))
+            children
+            (update-in [:content] flat-conj (mapcat -enlive-node children)))))
 
 (defn comment->enlive-node
   [{:keys [text condition children]}]
-  (cond-> {:type :comment}
-
-          condition
-          (assoc :data (str "<!--[" condition "]>"
-                            text
-                            "<![endif]-->"))
-
-          (not condition)
-          (assoc :data (str "<!-- " text " -->"))
-
-          children
-          (update-in [:children] flat-conj (mapcat -enlive-node children))))
+  (concat (if condition
+            ["<!--[" condition "]>"]
+            ["<!-- "])
+          (when text
+            [text])
+          (mapcat -enlive-node children)
+          (if condition
+            ["<![endif]-->"]
+            [" -->"])))
 
 (extend-protocol ToEnliveNode
   hamelito.parse_tree.Element
