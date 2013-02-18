@@ -39,6 +39,11 @@
         parse-res (parser/parse-haml char-seq)]
     (hamelito.enlive/node-seq (:user parse-res))))
 
+(defn enlive-parser
+  [^java.io.InputStream stream]
+  (with-open [^java.io.Closeable stream stream]
+    (enlive-node-seq (io/reader stream))))
+
 (defn- ^java.io.InputStream resource-stream
   [path]
   (.. clojure.lang.RT baseLoader (getResourceAsStream path)))
