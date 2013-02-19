@@ -30,7 +30,7 @@
   [{:keys [attributes inline-content children] :as element}]
   (cond-> [(element-tag element)]
 
-          attributes
+          (not (empty? attributes))
           (conj attributes)
 
           (not (string/blank? inline-content)) 
@@ -90,6 +90,9 @@
 (defn- to-hiccup
   [parse-tree]
   (-to-hiccup parse-tree))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Public API
 
 (defn hiccup
   [haml-source]
