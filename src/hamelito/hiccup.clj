@@ -1,9 +1,8 @@
 (ns hamelito.hiccup
   (:require [hamelito.doctypes :as doctypes]
-            [hiccup.core       :as h]
-            [hiccup.page       :as hp]
-            [clojure.string    :as string])
-  (:use [hamelito.parse-tree]))
+            [hamelito.parser   :as parser]
+            [hiccup.core       :as hiccup]
+            [clojure.string    :as string]))
 
 ;; bring in the cond->
 (when (< (:minor *clojure-version*) 5)
@@ -52,24 +51,51 @@
             ["<![endif]-->"]
             [" -->"])))
 
+(defmulti filtered-block->hiccup :type)
+
+(defmethod filtered-block->hiccup :plaintext
+  [filtered-block]
+  (apply str (interpose "\n" (:lines filtered-block))))
+
+(defmethod filtered-block->hiccup :javascript
+  [filtered-block]
+  [:script (apply str (interpose "\n" (:lines filtered-block)))])
+
+(defmethod filtered-block->hiccup :default
+  [filtered-block]
+  (throw (ex-info (format "Unknown filter type: %s" (:type filtered-block))
+                  {:node filtered-block})))
+
 (extend-protocol ToHiccup
-  hamelito.parse_tree.Element
+  hamelito.parser.Element
   (-to-hiccup [this] (element->hiccup this))
 
-  hamelito.parse_tree.Text
+  hamelito.parser.Text
   (-to-hiccup [this] (:text this))
 
-  hamelito.parse_tree.Comment
+  hamelito.parser.FilteredBlock
+  (-to-hiccup [this] (filtered-block->hiccup this))
+  
+  hamelito.parser.Comment
   (-to-hiccup [this] (comment->hiccup this))
   
-  hamelito.parse_tree.Doctype
+  hamelito.parser.Doctype
   (-to-hiccup [this] (doctypes/lookup-doctype :html5 (:value this)))
   
-  hamelito.parse_tree.Document
+  hamelito.parser.Document
   (-to-hiccup [this] (concat
                       (mapv -to-hiccup (:doctypes this))
                       (mapv -to-hiccup (:elements this)))))
 
-(defn to-hiccup
+(defn- to-hiccup
   [parse-tree]
   (-to-hiccup parse-tree))
+
+(defn hiccup
+  [haml-source]
+  (let [parse-tree (parser/parse-tree haml-source)]
+    (to-hiccup parse-tree)))
+
+(defn html
+  [haml-source]
+  (hiccup/html (seq (hiccup haml-source))))

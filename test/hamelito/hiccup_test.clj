@@ -1,11 +1,11 @@
-(ns hamelito.html-test
-  (:require [hamelito.api :as hamelito])
+(ns hamelito.hiccup-test
+  (:require [hamelito.hiccup :as hiccup])
   (:use [clojure.test]))
 
 (defmacro defhtmltest
   [name & test-cases]
   `(deftest ~name
-     (are [input# expected#] (= expected# (hamelito/html input#))
+     (are [input# expected#] (= expected# (hiccup/html input#))
           ~@test-cases)))
 
 (defhtmltest basic
@@ -197,4 +197,47 @@
   "/[if IE]\n  %p Go away\n"
   "<!--[if IE]><p>Go away</p><![endif]-->"
   
+  )
+
+(defhtmltest plaintext-block
+
+  ":plaintext"
+  ""
+
+  ":plaintext\n  a"
+  "a"
+
+  ":plaintext\n   a"
+  " a"
+
+  ":plaintext\n  a b c  "
+  "a b c  "
+
+  ":plaintext\n  a\n  b\n  c"
+  "a\nb\nc"
+
+  ":plaintext\n  a\n   b  \n    c  "
+  "a\n b  \n  c  "
+
+  ":plaintext\n  a\n   b  \n    c  \n"
+  "a\n b  \n  c  "
+
+  "%div\n  :plaintext\n    a"
+  "<div>a</div>"
+
+  "%div\n  :plaintext\n     a"
+  "<div> a</div>"
+
+  "%div\n  :plaintext\n    a\n\n    b"
+  "<div>a\nb</div>"
+  )
+
+(defhtmltest javascript-block
+
+  ":javascript"
+  "<script></script>"
+
+  ":javascript\n  alert('hello world!');"
+  "<script>alert('hello world!');</script>"
+
   )

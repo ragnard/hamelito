@@ -1,7 +1,8 @@
 (ns hamelito.enlive
   (:require [hamelito.doctypes :as doctypes]
-            [clojure.string  :as string])
-  (:use [hamelito.parse-tree]))
+            [hamelito.parser   :as parser]
+            [clojure.string    :as string]
+            [clojure.java.io   :as io]))
 
 ;; bring in the cond->
 (when (< (:minor *clojure-version*) 5)
@@ -51,23 +52,45 @@
           (assoc :data text)))
 
 (extend-protocol ToEnliveNode
-  hamelito.parse_tree.Element
+  hamelito.parser.Element
   (-enlive-node [this] (element->enlive-node this))
 
-  hamelito.parse_tree.Text
+  hamelito.parser.Text
   (-enlive-node [this] (:text this))
 
-  hamelito.parse_tree.Comment
+  hamelito.parser.Comment
   (-enlive-node [this] (comment->enlive-node this))
   
-  hamelito.parse_tree.Doctype
+  hamelito.parser.Doctype
   (-enlive-node [this] (doctypes/lookup-doctype :html5 (:value this)))
 
-  hamelito.parse_tree.Document
+  hamelito.parser.Document
   (-enlive-node [this]
     (concat (map -enlive-node (:doctypes this))
             (map -enlive-node (:elements this)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Public API
+
 (defn node-seq
-  [parse-tree]
-  (-enlive-node parse-tree))
+  [haml-source]
+  (-> haml-source
+      parser/parse-tree
+      -enlive-node))
+
+(defn parser
+  [^java.io.InputStream stream]
+  (with-open [^java.io.Closeable stream stream]
+    (node-seq (io/reader stream))))
+
+;; helpers for enlive pre 1.1.1, ie without support for pluggable
+;; parsers.
+
+(defn- ^java.io.InputStream resource-stream
+  [path]
+  (.. clojure.lang.RT baseLoader (getResourceAsStream path)))
+
+(defn haml-resource
+  [path]
+  (with-open [stream (resource-stream path)]
+    (into [] (node-seq (io/reader stream)))))

@@ -1,11 +1,37 @@
 (ns hamelito.parser
   (:refer-clojure :exclude [class])
   (:require [clojure.string :as string])
-  (:use [hamelito.parse-tree]
-        [blancas.kern.core]))
+  (:use [blancas.kern.core :exclude [char-seq]]))
+
+(defprotocol CharSeq
+  "things that can provide a seq of characters"
+  (char-seq [this]))
+
+(defn reader-char-seq
+  [^java.io.Reader rdr]
+  (let [c (.read rdr)]
+    (when (not= -1 c)
+      (cons (char c) (lazy-seq (reader-char-seq rdr))))))
+
+(extend-protocol CharSeq
+  String
+  (char-seq [s] (seq s))
+
+  java.io.Reader
+  (char-seq [rdr] (reader-char-seq rdr)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Parse Tree
+
+(defrecord Document [doctypes elements])
+(defrecord Doctype [value])
+(defrecord Text [text])
+(defrecord FilteredBlock [type lines])
+(defrecord Element [name id classes attributes text children])
+(defrecord Comment [text condition children])
+
+;;;; Parse tree construction
 
 (def empty-document (->Document [] []))
 
@@ -15,15 +41,15 @@
 (def vec-conj (fnil conj []))
 
 (extend-protocol ContentNode
-  hamelito.parse_tree.Element
+  Element
   (update-children [this f args]
     (apply update-in this [:children] f args))
 
-  hamelito.parse_tree.Comment
+  Comment
   (update-children [this f args]
     (apply update-in this [:children] f args)))
 
-(defn push-node
+(defn- push-node
   [nodes level node]
   (if (< 0 level)
     (let [fixed  (butlast nodes)
@@ -36,34 +62,51 @@
               (update-children next push-node [(dec level) node]))))
     (vec-conj nodes node)))
 
-(defn add-doctype
-  [document doctype]
-  (update-in document [:doctypes] conj doctype))
+;;;; Parser state functions
 
-(defn add-node
-  [document level node]
-  (update-in document [:elements] push-node level node))
+(defn- add-doctype
+  [state doctype]
+  (update-in state [:document :doctypes] conj doctype))
+
+(defn- add-node
+  [state level node]
+  (update-in state [:document :elements] push-node level node))
+
+(defn- set-indent
+  [state indent]
+  (assoc state :indent indent))
 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; HAML(ish) parser
 
-;;;; helpers
-
-(defn quoted
-  [char parser]
-  (between (sym* char) (sym* char) parser))
-
-(defn anything-but
-  [char]
-  (satisfy #(not= % char)))
-
 ;;;; general
 
+;; TODO: Improve this
 (def identifier2        (<|> alpha-num (sym* \-) (sym* \_)))
 
 (def vspace             (many new-line*))
+
+(defn- anything-but
+  [char]
+  (satisfy #(not= % char)))
+
+(defn- quoted
+  [char parser]
+  (between (sym* char) (sym* char) parser))
+
+(defn- quoted-any
+  [char]
+  (quoted char (<+> (many (anything-but char)))))
+
+(defn trim-ws
+  [p]
+  (<< p (many white-space)))
+
+(defn trim-spaces
+  [p]
+  (<< p (many (one-of* (str \space \tab)))))
 
 (defn parens*
   [p]
@@ -82,6 +125,8 @@
   (>> (token* prefix)
       (<+> (many1 identifier2))))
 
+(def indent            (<*> space space))
+
 ;;;; doctype
 (def doctype-def       (token* "!!!" ))
 (def doctype-value     (>> (sym* \space)
@@ -94,13 +139,6 @@
 
 ;;;; attributes
 
-(defn quoted-any
-  [char]
-  (quoted char (<+> (many (anything-but char)))))
-
-(defn trim-ws
-  [p]
-  (<< p (many white-space)))
 
 ;; html-style attributes
 
@@ -202,11 +240,40 @@
                              (return (map->Text
                                       {:text text}))))
 
+;;;; Filtered Content
 
-(def indent            (<*> space space))
+(def filter-type       (bind [_    (sym* \:)
+                              type (<+> (many1 identifier2))
+                              _    (optional new-line*)]
+                             (return (keyword type))))
+
+
+(def consume-indent    (bind [usr    get-state]
+                             (let [n (inc (:indent usr 0))]
+                               (condp > n
+                                 1 (return [])
+                                 2 indent
+                                (times n indent)))))
+
+(def filter-line       (bind [_      consume-indent
+                              line   (<+> (many (anything-but \newline)))
+                              _      vspace]
+                             (return line)))
+
+(def filtered-content  (bind [type  filter-type
+                              lines (many filter-line)]
+                             (return (map->FilteredBlock
+                                      {:type type
+                                       :lines lines}))))
+
+;;; Main
 
 (def tag-line          (bind [level (many indent)
-                              node  (<|> tag html-comment nested-content)
+                              _     (modify-state set-indent (count level))
+                              node  (<|> tag
+                                         html-comment
+                                         filtered-content
+                                         nested-content)
                               _     (modify-state add-node (count level) node)]
                              (return {:level (count level)
                                       :content node})))
@@ -225,13 +292,17 @@
   (and (:ok res)
        (nil? (seq (:input res)))))
 
-(defn parse-haml
-  [char-seq]
-  (let [parse-res (parse start char-seq nil empty-document)]
+(defn- parse-haml
+  [cs]
+  (let [parse-res (parse start (char-seq cs) nil {:document empty-document})]
     (if (parse-succeded? parse-res)
       parse-res
       (throw (ex-info "HAML parsing failed"
                       {:parse-result parse-res})))))
+
+(defn parse-tree
+  [char-seq]
+  (-> (parse-haml char-seq) :user :document))
 
 (comment
 

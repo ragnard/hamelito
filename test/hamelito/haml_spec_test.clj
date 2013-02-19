@@ -36,19 +36,12 @@
       (str "-test")
       symbol))
 
-(defn- parse-succeded?
-  [res]
-  (and (:ok res)
-       (nil? (seq (:input res)))))
-
 (defn- parse-test-case
   [[description test-data]]
   (let [haml (test-data "haml")
         html (test-data "html")]
     `(testing ~description
-       (let [res# (parser/parse-haml ~haml)]
-         (is (parse-succeded? res#)
-             (str "Unable to parse input: \n" ~haml "\n\n"))))))
+       (parser/parse-tree ~haml))))
 
 (defn- requires-locals?
   [test-spec]
