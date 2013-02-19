@@ -15,7 +15,7 @@
   (apply vec-conj vec xs))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Enlive 
+;;;; Enlive generation
 
 (defprotocol ToEnliveNode
   (-enlive-node [this]))
@@ -93,17 +93,22 @@
 ;;;; Public API
 
 (defn node-seq
+  "Returns a seq of enlive nodes from the given haml-source. A
+  haml-source is anything that satisfies the CharSeq protocol,
+  typically a String or a Reader."
   [haml-source]
   (-> haml-source
       parser/parse-tree
       -enlive-node))
 
 (defn parser
+  "A parser for Haml documents implementing the enlive pluggable
+  parser interface"
   [^java.io.InputStream stream]
   (with-open [^java.io.Closeable stream stream]
     (node-seq (io/reader stream))))
 
-;; helpers for enlive pre 1.1.1, ie without support for pluggable
+;; helpers for enlive pre 1.1.1, ie. without support for pluggable
 ;; parsers.
 
 (defn- ^java.io.InputStream resource-stream
@@ -111,6 +116,8 @@
   (.. clojure.lang.RT baseLoader (getResourceAsStream path)))
 
 (defn haml-resource
+  "Returns a seq of enlive nodes from Haml document at path on the
+  classpath"
   [path]
   (with-open [stream (resource-stream path)]
     (into [] (node-seq (io/reader stream)))))
