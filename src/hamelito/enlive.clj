@@ -51,6 +51,22 @@
           (not condition)
           (assoc :data text)))
 
+(defmulti filtered-block->enlive-node :type)
+
+(defmethod filtered-block->enlive-node :plaintext
+  [filtered-block]
+  (apply str (interpose "\n" (:lines filtered-block))))
+
+(defmethod filtered-block->enlive-node :javascript
+  [filtered-block]
+  {:tag :script :content (apply str (interpose "\n" (:lines filtered-block)))})
+
+(defmethod filtered-block->enlive-node :default
+  [filtered-block]
+  (throw (ex-info (format "Unknown filter type: %s" (:type filtered-block))
+                  {:node filtered-block})))
+
+
 (extend-protocol ToEnliveNode
   hamelito.parser.Element
   (-enlive-node [this] (element->enlive-node this))
@@ -60,6 +76,10 @@
 
   hamelito.parser.Comment
   (-enlive-node [this] (comment->enlive-node this))
+
+  hamelito.parser.FilteredBlock
+  (-enlive-node [this] (filtered-block->enlive-node this))
+  
   
   hamelito.parser.Doctype
   (-enlive-node [this] (doctypes/lookup-doctype :html5 (:value this)))
