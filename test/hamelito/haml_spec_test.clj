@@ -23,7 +23,7 @@
     "tags with inline content"
     "tags with nested content"
     "tags with unusual CSS identifiers"
-    ;; "tags with unusual HTML characters"
+    "tags with unusual HTML characters"
     ;; "whitespace preservation"
     ;; "whitespace removal"
     })
