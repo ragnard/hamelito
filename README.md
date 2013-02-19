@@ -61,6 +61,7 @@ Things todo/investigate:
 ## Usage
 
 Hamelito provides to main ways of consuming Haml documents:
+
 1. As enlive nodes
 2. As hiccup data
 
@@ -76,7 +77,7 @@ interface.
 
 (in-ns 'test)
 
-;; To use HAML for all templates in the current namespace:
+;; To use Haml for all templates in the current namespace:
 
 (enlive/set-ns-parser! haml/parser)
 
@@ -84,7 +85,7 @@ interface.
   [])
 
 
-;; To use HAML for a specific template/snippet:
+;; To use Haml for a specific template/snippet:
 
 (deftemplate haml-template {:parser haml/parser}
   (java.io.StringReader. "%h1 Hello")
