@@ -20,7 +20,7 @@
 (defprotocol ToEnliveNode
   (-enlive-node [this]))
 
-(defn element->enlive-node
+(defn- element->enlive-node
   [{:keys [name id classes attributes inline-content children] :as element}]
   (cond-> {:tag (or (keyword name) :div)}
 
@@ -39,7 +39,7 @@
           children
           (update-in [:content] flat-conj (map -enlive-node children))))
 
-(defn comment->enlive-node
+(defn- comment->enlive-node
   [{:keys [text condition children]}]
   (when children
     (throw (ex-info "Children to comments not yet supported" {})))
