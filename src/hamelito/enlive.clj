@@ -115,7 +115,7 @@
   [path]
   (.. clojure.lang.RT baseLoader (getResourceAsStream path)))
 
-(defn haml-resource
+(defn resource
   "Returns a seq of enlive nodes from Haml document at path on the
   classpath"
   [path]
