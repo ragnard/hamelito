@@ -199,36 +199,36 @@
   
   )
 
-(defhtmltest plaintext-block
+(defhtmltest plain-block
 
-  ":plaintext"
+  ":plain"
   ""
 
-  ":plaintext\n  a"
+  ":plain\n  a"
   "a"
 
-  ":plaintext\n   a"
+  ":plain\n   a"
   " a"
 
-  ":plaintext\n  a b c  "
+  ":plain\n  a b c  "
   "a b c  "
 
-  ":plaintext\n  a\n  b\n  c"
+  ":plain\n  a\n  b\n  c"
   "a\nb\nc"
 
-  ":plaintext\n  a\n   b  \n    c  "
+  ":plain\n  a\n   b  \n    c  "
   "a\n b  \n  c  "
 
-  ":plaintext\n  a\n   b  \n    c  \n"
+  ":plain\n  a\n   b  \n    c  \n"
   "a\n b  \n  c  "
 
-  "%div\n  :plaintext\n    a"
+  "%div\n  :plain\n    a"
   "<div>a</div>"
 
-  "%div\n  :plaintext\n     a"
+  "%div\n  :plain\n     a"
   "<div> a</div>"
 
-  "%div\n  :plaintext\n    a\n\n    b"
+  "%div\n  :plain\n    a\n\n    b"
   "<div>a\nb</div>"
   )
 
