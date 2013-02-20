@@ -255,7 +255,7 @@
                                  2 indent
                                 (times n indent)))))
 
-(def filter-line       (bind [_      consume-indent
+(def filter-line       (bind [_      (<:> consume-indent)
                               line   (<+> (many (anything-but \newline)))
                               _      (many vspace)]
                              (return line)))

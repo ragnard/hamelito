@@ -230,6 +230,12 @@
 
   "%div\n  :plain\n    a\n\n    b"
   "<div>a\nb</div>"
+
+  "%div One\n  :plain\n    Hello\n\n%div Two"
+  "<div>OneHello</div><div>Two</div>"
+
+  "%div One\n  %div Two\n    :plain\n      Three\n      Four\n    %div Five"
+  "<div>One<div>TwoThree\nFour<div>Five</div></div></div>"
   )
 
 (defhtmltest javascript-block
