@@ -243,7 +243,7 @@
 ;;;; Filtered Content
 
 (def filter-type       (bind [_    (sym* \:)
-                              type (<+> (many1 identifier2))
+                              type (trim-spaces (<+> (many1 identifier2)))
                               _    (optional new-line*)]
                              (return (keyword type))))
 
@@ -257,7 +257,7 @@
 
 (def filter-line       (bind [_      consume-indent
                               line   (<+> (many (anything-but \newline)))
-                              _      vspace]
+                              _      (many vspace)]
                              (return line)))
 
 (def filtered-content  (bind [type  filter-type
