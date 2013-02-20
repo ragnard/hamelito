@@ -53,7 +53,7 @@
 
 (defmulti filtered-block->enlive-node :type)
 
-(defmethod filtered-block->enlive-node :plaintext
+(defmethod filtered-block->enlive-node :plain
   [filtered-block]
   (apply str (interpose "\n" (:lines filtered-block))))
 

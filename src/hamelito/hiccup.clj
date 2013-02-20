@@ -53,7 +53,7 @@
 
 (defmulti filtered-block->hiccup :type)
 
-(defmethod filtered-block->hiccup :plaintext
+(defmethod filtered-block->hiccup :plain
   [filtered-block]
   (apply str (interpose "\n" (:lines filtered-block))))
 
