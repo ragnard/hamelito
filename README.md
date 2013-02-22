@@ -74,7 +74,7 @@ interface.
 
 ```clojure
 (require '[net.cgrand.enlive-html :as enlive])
-(require '[hamelito.enlive :as haml])
+(require '[com.github.ragnard.hamelito.enlive :as haml])
 
 (in-ns 'test)
 
@@ -95,7 +95,7 @@ interface.
 You can also ask for the raw enlive nodes:
 
 ```clojure
-(require '[hamelito.enlive :as [haml]])
+(require '[com.github.ragnard.hamelito.enlive :as [haml]])
 
 (haml/node-seq "%h1 Blahonga!")
 ;; => ({:content ["Blahonga!"], :attrs {}, :tag :h1})
@@ -119,7 +119,7 @@ classpath with enlive:
 ### hiccup
 
 ```clojure
-(require '[hamelito.hiccup :as haml])
+(require '[com.github.ragnard.hamelito.hiccup :as haml])
 
 ;; The hiccup function takes a Haml source and returns some 
 ;; hiccup data:
