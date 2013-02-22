@@ -1,12 +1,19 @@
-(ns hamelito.hiccup
-  (:require [hamelito.doctypes :as doctypes]
-            [hamelito.parser   :as parser]
+(ns com.github.ragnard.hamelito.hiccup
+  (:require [com.github.ragnard.hamelito.doctypes :as doctypes]
+            [com.github.ragnard.hamelito.parser   :as parser]
             [hiccup.core       :as hiccup]
-            [clojure.string    :as string]))
+            [clojure.string    :as string])
+  (:import [com.github.ragnard.hamelito.parser
+            Comment
+            Document
+            Doctype
+            Element
+            Text
+            FilteredBlock]))
 
 ;; bring in the cond->
 (when (< (:minor *clojure-version*) 5)
-  (use 'hamelito.util))
+  (use 'com.github.ragnard.hamelito.util))
 
 (defn- flat-conj
   [vec xs]
@@ -78,22 +85,22 @@
                   {:node filtered-block})))
 
 (extend-protocol ToHiccup
-  hamelito.parser.Element
+  Element
   (-to-hiccup [this] (element->hiccup this))
 
-  hamelito.parser.Text
+  Text
   (-to-hiccup [this] (:text this))
 
-  hamelito.parser.FilteredBlock
+  FilteredBlock
   (-to-hiccup [this] (filtered-block->hiccup this))
   
-  hamelito.parser.Comment
+  Comment
   (-to-hiccup [this] (comment->hiccup this))
   
-  hamelito.parser.Doctype
+  Doctype
   (-to-hiccup [this] (doctypes/lookup-doctype :html5 (:value this)))
   
-  hamelito.parser.Document
+  Document
   (-to-hiccup [this] (concat
                       (mapv -to-hiccup (:doctypes this))
                       (mapv -to-hiccup (:elements this)))))

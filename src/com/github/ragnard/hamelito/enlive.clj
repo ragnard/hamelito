@@ -1,12 +1,19 @@
-(ns hamelito.enlive
-  (:require [hamelito.doctypes :as doctypes]
-            [hamelito.parser   :as parser]
+(ns com.github.ragnard.hamelito.enlive
+  (:require [com.github.ragnard.hamelito.doctypes :as doctypes]
+            [com.github.ragnard.hamelito.parser   :as parser]
             [clojure.string    :as string]
-            [clojure.java.io   :as io]))
+            [clojure.java.io   :as io])
+  (:import [com.github.ragnard.hamelito.parser
+            Comment
+            Document
+            Doctype
+            Element
+            Text
+            FilteredBlock]))
 
 ;; bring in the cond->
 (when (< (:minor *clojure-version*) 5)
-  (use 'hamelito.util))
+  (use 'com.github.ragnard.hamelito.util))
 
 (def vec-conj (fnil conj []))
 
@@ -72,23 +79,23 @@
 
 
 (extend-protocol ToEnliveNode
-  hamelito.parser.Element
+  Element
   (-enlive-node [this] (element->enlive-node this))
 
-  hamelito.parser.Text
+  Text
   (-enlive-node [this] (:text this))
 
-  hamelito.parser.Comment
+  Comment
   (-enlive-node [this] (comment->enlive-node this))
 
-  hamelito.parser.FilteredBlock
+  FilteredBlock
   (-enlive-node [this] (filtered-block->enlive-node this))
   
   
-  hamelito.parser.Doctype
+  Doctype
   (-enlive-node [this] (doctypes/lookup-doctype :html5 (:value this)))
 
-  hamelito.parser.Document
+  Document
   (-enlive-node [this]
     (concat (map -enlive-node (:doctypes this))
             (map -enlive-node (:elements this)))))

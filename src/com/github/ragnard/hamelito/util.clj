@@ -1,4 +1,4 @@
-(ns hamelito.util)
+(ns com.github.ragnard.hamelito.util)
 
 (defmacro cond->
   "Conditional threading macro. Takes an initial value and an even

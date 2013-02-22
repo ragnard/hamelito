@@ -1,4 +1,4 @@
-(ns hamelito.parser
+(ns com.github.ragnard.hamelito.parser
   (:refer-clojure :exclude [class])
   (:require [clojure.string :as string])
   (:use [blancas.kern.core :exclude [char-seq]]))

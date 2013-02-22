@@ -1,4 +1,4 @@
-(ns hamelito.doctypes)
+(ns com.github.ragnard.hamelito.doctypes)
 
 (def ^:private doctypes
   {:xhtml

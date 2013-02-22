@@ -1,5 +1,5 @@
-(ns hamelito.hiccup-test
-  (:require [hamelito.hiccup :as hiccup])
+(ns com.github.ragnard.hamelito.hiccup-test
+  (:require [com.github.ragnard.hamelito.hiccup :as hiccup])
   (:use [clojure.test]))
 
 (defmacro defhtmltest
