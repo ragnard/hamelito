@@ -1,5 +1,5 @@
 (defproject hamelito "0.1.0-SNAPSHOT"
-  :description "A distant cousin to HAML"
+  :description "Library for a subset of Haml with hiccup and enlive support"
   :url "http://github.com/ragnard/hamelito"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
