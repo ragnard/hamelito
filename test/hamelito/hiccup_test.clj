@@ -248,8 +248,23 @@
 
   )
 
+(defhtmltest css-block
+  ":css"
+  "<style></style>"
+
+  ":css\n  font-weight: bold;"
+  "<style>font-weight: bold;</style>"
+
+  ":css\n  font-weight: bold;\n  color: brown;"
+  "<style>font-weight: bold;\ncolor: brown;</style>"
+
+  )
+
 (defhtmltest cdata-block
 
+  ":cdata"
+  "<![CDATA[]]>"
+  
   ":cdata\n  content"
   "<![CDATA[content]]>"
 

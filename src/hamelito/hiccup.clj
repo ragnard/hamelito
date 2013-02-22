@@ -61,6 +61,11 @@
   [filtered-block]
   [:script (apply str (interpose "\n" (:lines filtered-block)))])
 
+(defmethod filtered-block->hiccup :css
+  [filtered-block]
+  [:style (apply str (interpose "\n" (:lines filtered-block)))])
+
+
 (defmethod filtered-block->hiccup :cdata
   [filtered-block]
   (str "<![CDATA["

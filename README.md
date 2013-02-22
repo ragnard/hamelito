@@ -40,6 +40,8 @@ Things that should work:
   - `:plain`
   - `:javascript`
   - `:cdata`
+  - `:css`
+
 - Doctypes 
   - Only `!!!` is currently supported an will yield HTML5 doctype
 
@@ -55,8 +57,6 @@ Things todo/investigate:
 - More doctypes, especially !!! XML with encoding
 - Filters?
   - Maybe these make sense:
-    - `:cdata`
-    - `:css`
     - `:escaped`
 
 ## Usage
