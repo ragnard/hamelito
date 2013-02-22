@@ -74,7 +74,7 @@
 
 (defmethod filtered-block->hiccup :default
   [filtered-block]
-  (throw (ex-info (format "Unknown filter type: %s" (:type filtered-block))
+  (throw (ex-info (format "Unsupported filter type: %s" (:type filtered-block))
                   {:node filtered-block})))
 
 (extend-protocol ToHiccup

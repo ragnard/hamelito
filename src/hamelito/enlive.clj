@@ -61,9 +61,13 @@
   [filtered-block]
   {:tag :script :content (apply str (interpose "\n" (:lines filtered-block)))})
 
+(defmethod filtered-block->enlive-node :css
+  [filtered-block]
+  {:tag :style :content (apply str (interpose "\n" (:lines filtered-block)))})
+
 (defmethod filtered-block->enlive-node :default
   [filtered-block]
-  (throw (ex-info (format "Unknown filter type: %s" (:type filtered-block))
+  (throw (ex-info (format "Unsupported filter type: %s" (:type filtered-block))
                   {:node filtered-block})))
 
 
