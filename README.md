@@ -6,19 +6,21 @@
 > looks up to his handsome relative, but has different goals in life.
 
 hamelito is a [Clojure](http://www.clojure.org) library implementing a
-parser for a subset of Haml, and the ability to generate of hiccup,
-enlive or html data. Parsing is done using the completely awesome
-parser combinator library [kern](https://github.com/blancas/kern/) by
-Armando Blancas.
+parser for a subset of Haml, and the ability to generate hiccup,
+enlive or html data. Parsing is done using the quite awesome parser
+combinator library [kern](https://github.com/blancas/kern/) by Armando
+Blancas.
 
-The main goal is to allow Haml documents to be used as templates for
-[enlive](http://github.com/cgrand/enlive) and the plan is to support
-only the features of Haml that make sense for the purpose of
-generating static documents.
+The initial goal for the library is to allow Haml documents to be used
+as templates for [enlive](http://github.com/cgrand/enlive) and the
+plan is to support only the features of Haml that make sense for the
+purpose of generating static documents, ie. there will be no support
+for inline code.
 
 ## Status
 
-Early days.
+Can parse a decent subset of Haml and generate corresponding hiccup
+and enlive data.
 
 Things that should work:
 - Basic element content:
@@ -41,14 +43,12 @@ Things that should work:
   - `:javascript`
   - `:cdata`
   - `:css`
-
 - Doctypes 
   - Only `!!!` is currently supported an will yield HTML5 doctype
 
 Hiccup to html translation [tests](https://github.com/ragnard/hamelito/blob/master/test/hamelito/hiccup_test.clj).
 
 Things todo/investigate:
-- Better errors
 - Be more strict with valid identifiers when parsing
 - Escaping
 - Comments
