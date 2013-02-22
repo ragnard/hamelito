@@ -294,7 +294,6 @@
 
 (defn- throw-error-message
   [{:keys [error] :as pstate}]
-  (pprint error)
   (let [{:keys [line col]} (:pos error)
         msgs (#'blancas.kern.core/get-msg-list error)]
     (throw (ex-info (format "Parsing failed at line %s:%s: %s"
