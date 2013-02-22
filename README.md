@@ -68,9 +68,9 @@ Hamelito provides to main ways of consuming Haml documents:
 
 ### enlive
 
-Since version `1.1.1`, enlive supports pluggable parsers and Hamelito 
-provides `hamelito.enlive/parser` which implements the required 
-interface.
+Since version `1.1.1`, enlive supports pluggable parsers and Hamelito
+provides `com.github.ragnard.hamelito.enlive/parser` which implements
+the required interface.
 
 ```clojure
 (require '[net.cgrand.enlive-html :as enlive])
@@ -107,7 +107,7 @@ classpath with enlive:
 
 ```clojure
 (require '[net.cgrand.enlive-html :as enlive])
-(require '[hamelito.enlive :as [haml]])
+(require '[com.github.ragnard.hamelito.enlive :as [haml]])
 
 (defsnippet snippet1 (haml/resource "page1.haml")
   [:body :h1] (enlive/content "Hola!"))
