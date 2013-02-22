@@ -288,17 +288,27 @@
 (def start             (>> vspace (<< haml eof)))
 
 (defn- parse-succeded?
-  [res]
-  (and (:ok res)
-       (nil? (seq (:input res)))))
+  [pstate]
+  (and (:ok pstate)
+       (nil? (seq (:input pstate)))))
+
+(defn- throw-error-message
+  [{:keys [error] :as pstate}]
+  (pprint error)
+  (let [{:keys [line col]} (:pos error)
+        msgs (#'blancas.kern.core/get-msg-list error)]
+    (throw (ex-info (format "Parsing failed at line %s:%s: %s"
+                            line col (string/join ", " msgs))
+                    {:msgs msgs
+                     :line line
+                     :col col}))))
 
 (defn- parse-haml
   [cs]
-  (let [parse-res (parse start (char-seq cs) nil {:document empty-document})]
-    (if (parse-succeded? parse-res)
-      parse-res
-      (throw (ex-info "HAML parsing failed"
-                      {:parse-result parse-res})))))
+  (let [pstate (parse start (char-seq cs) nil {:document empty-document})]
+    (if (parse-succeded? pstate)
+      pstate
+      (throw-error-message pstate))))
 
 (defn parse-tree
   [char-seq]
@@ -306,6 +316,8 @@
 
 (comment
 
+  (parse-tree " asldkasld")
+  
   (run* tag  "!!! XML\n\n%div.a.b.c#d42.e.f")
 
   (run* tag-line  "  %div.a.b.c#d42.e.f")
