@@ -247,3 +247,13 @@
   "<script>alert('hello world!');</script>"
 
   )
+
+(defhtmltest cdata-block
+
+  ":cdata\n  content"
+  "<![CDATA[content]]>"
+
+  ":cdata\n  one  \n   two "
+  "<![CDATA[one  \n two ]]>"
+  
+  )

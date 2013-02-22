@@ -61,6 +61,12 @@
   [filtered-block]
   [:script (apply str (interpose "\n" (:lines filtered-block)))])
 
+(defmethod filtered-block->hiccup :cdata
+  [filtered-block]
+  (str "<![CDATA["
+       (apply str (interpose "\n" (:lines filtered-block)))
+       "]]>"))
+
 (defmethod filtered-block->hiccup :default
   [filtered-block]
   (throw (ex-info (format "Unknown filter type: %s" (:type filtered-block))
