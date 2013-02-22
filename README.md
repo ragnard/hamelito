@@ -2,18 +2,19 @@
 
 [![Build Status](https://travis-ci.org/ragnard/hamelito.png?branch=master)](https://travis-ci.org/ragnard/hamelito)
 
-> As the younger, distant cousin to [HAML](http://haml.info/), Hamelito
+> As the younger, distant cousin to [Haml](http://haml.info/), Hamelito
 > looks up to his handsome relative, but has different goals in life.
 
 hamelito is a [Clojure](http://www.clojure.org) library implementing a
-small subset of HAML. Parsing is done using the completely awesome
+parser for a subset of Haml, and the ability to generate of hiccup,
+enlive or html data. Parsing is done using the completely awesome
 parser combinator library [kern](https://github.com/blancas/kern/) by
 Armando Blancas.
 
-The main goal is to allow HAML documents to be used as templates for
+The main goal is to allow Haml documents to be used as templates for
 [enlive](http://github.com/cgrand/enlive) and the plan is to support
-only the features of HAML that make sense for generating static
-documents.
+only the features of Haml that make sense for the purpose of
+generating static documents.
 
 ## Status
 
@@ -26,7 +27,6 @@ Things that should work:
   - `%h1 Hello`
 - Text content
   - `Blahonga`
-    - Probably doesn't preserve white space the way you would expect
 - Arbitrarily, valid, nested tags/content
 - Attributes
   - Ruby style: `%a{:href => 'www.xkcd.org'}`
@@ -39,6 +39,7 @@ Things that should work:
 - Filters
   - `:plain`
   - `:javascript`
+  - `:cdata`
 - Doctypes 
   - Only `!!!` is currently supported an will yield HTML5 doctype
 
@@ -87,8 +88,7 @@ interface.
 
 ;; To use Haml for a specific template/snippet:
 
-(deftemplate haml-template {:parser haml/parser}
-  (java.io.StringReader. "%h1 Hello")
+(deftemplate haml-template {:parser haml/parser} "template.haml"
   [])
 ```
 
