@@ -31,6 +31,7 @@
 (defrecord Element [name id classes attributes text children])
 (defrecord Comment [text condition children])
 
+;;;;--------------------------------------------------------------------
 ;;;; Parse tree construction
 
 (def empty-document (->Document [] []))
@@ -62,6 +63,11 @@
               (update-children next push-node [(dec level) node]))))
     (vec-conj nodes node)))
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; HAML(ish) parser
+
 ;;;; Parser state functions
 
 (defn- add-doctype
@@ -76,14 +82,8 @@
   [state indent]
   (assoc state :indent indent))
 
+;;;; general parsers
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; HAML(ish) parser
-
-;;;; general
-
-;; TODO: Improve this
 (def identifier2        (<|> alpha-num (sym* \-) (sym* \_)))
 
 (def vspace             (many new-line*))
@@ -127,7 +127,9 @@
 
 (def indent            (<*> space space))
 
+;;;;--------------------------------------------------------------------
 ;;;; doctype
+
 (def doctype-def       (token* "!!!" ))
 (def doctype-value     (>> (sym* \space)
                            (<+> (many (anything-but \newline)))))
@@ -137,8 +139,8 @@
                              (return {:doctype (or value :default)})))
 (def doctypes          (sep-end-by vspace doctype))
 
+;;;;--------------------------------------------------------------------
 ;;;; attributes
-
 
 ;; html-style attributes
 
@@ -181,6 +183,7 @@
 (def attributes        (<|> html-attributes ruby-attributes))
 
 
+;;;;--------------------------------------------------------------------
 ;;;; element
 
 (def element           (prefixed-identifier "%"))
@@ -222,6 +225,7 @@
                                               :self-close? (boolean cl)
                                               :inline-content (string/trim ic)})))))
 
+;;;;--------------------------------------------------------------------
 ;;;; Comments
 
 (def comment-cond      (brackets* (<+> (many (anything-but \])))))
@@ -233,6 +237,7 @@
                                       {:text (string/trim text)
                                        :condition condition}))))
 
+;;;;--------------------------------------------------------------------
 ;;;; Text Content
 
 (def nested-content    (bind [text (<+> (anything-but \space)
@@ -240,6 +245,7 @@
                              (return (map->Text
                                       {:text text}))))
 
+;;;;--------------------------------------------------------------------
 ;;;; Filtered Content
 
 (def filter-type       (bind [_    (sym* \:)
@@ -266,6 +272,7 @@
                                       {:type type
                                        :lines lines}))))
 
+;;;;--------------------------------------------------------------------
 ;;; Main
 
 (def tag-line          (bind [level (many indent)
