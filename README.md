@@ -1,21 +1,32 @@
-# hamelito
-
-[![Build Status](https://travis-ci.org/ragnard/hamelito.png?branch=master)](https://travis-ci.org/ragnard/hamelito)
+# hamelito 
 
 > As the younger, distant cousin to [Haml](http://haml.info/), Hamelito
 > looks up to his handsome relative, but has different goals in life.
 
-hamelito is a [Clojure](http://www.clojure.org) library implementing a
-parser for a subset of Haml, and the ability to generate hiccup,
-enlive or html data. Parsing is done using the quite awesome parser
-combinator library [kern](https://github.com/blancas/kern/) by Armando
-Blancas.
+hamelito is a [Clojure](http://www.clojure.org) library providing the
+ability to read a subset of Haml and generate [hiccup](https://github.com/weavejester/hiccup),
+[enlive](http://github.com/cgrand/enlive) or html
+data. Parsing is done using the quite awesome parser combinator
+library [kern](https://github.com/blancas/kern/) by Armando Blancas.
+
 
 The initial goal for the library is to allow Haml documents to be used
 as templates for [enlive](http://github.com/cgrand/enlive) and the
 plan is to support only the features of Haml that make sense for the
-purpose of generating static documents, ie. there will be no support
-for inline code.
+purpose of generating documents with static content.
+
+## Artifacts [![Build Status](https://travis-ci.org/ragnard/hamelito.png?branch=master)](https://travis-ci.org/ragnard/hamelito)
+
+hamelito artifacts are published to [Clojars](http://clojars.org).
+
+### Current Release
+
+With Leiningen:
+
+```
+[com.github.ragnard/hamelito "0.1.0"]
+```
+
 
 ## Status
 
@@ -61,16 +72,16 @@ Things todo/investigate:
 
 ## Usage
 
-Hamelito provides to main ways of consuming Haml documents:
+hamelito can transform Haml documents into two formats:
 
-1. As enlive nodes
-2. As hiccup data
+1. enlive data
+2. hiccup data
 
 ### enlive
 
-Since version `1.1.1`, enlive supports pluggable parsers and Hamelito
-provides `com.github.ragnard.hamelito.enlive/parser` which implements
-the required interface.
+Since version `1.1.1`, enlive supports pluggable parsers and hamelito
+provides the function `com.github.ragnard.hamelito.enlive/parser` which 
+implements the required interface.
 
 ```clojure
 (require '[net.cgrand.enlive-html :as enlive])
@@ -79,40 +90,38 @@ the required interface.
 (in-ns 'test)
 
 ;; To use Haml for all templates in the current namespace:
-
 (enlive/set-ns-parser! haml/parser)
 
-(deftemplate haml-template "template.haml"
+(enlive/deftemplate haml-template "template.haml"
   [])
 
 
 ;; To use Haml for a specific template/snippet:
-
-(deftemplate haml-template {:parser haml/parser} "template.haml"
+(enlive/deftemplate haml-template {:parser haml/parser} "template.haml"
   [])
 ```
 
 You can also ask for the raw enlive nodes:
 
 ```clojure
-(require '[com.github.ragnard.hamelito.enlive :as [haml]])
+(require '[com.github.ragnard.hamelito.enlive :as haml])
 
 (haml/node-seq "%h1 Blahonga!")
 ;; => ({:content ["Blahonga!"], :attrs {}, :tag :h1})
 ```
 
 For versions of enlive prior to 1.1.1, a `resource` utility 
-function is provided to simplify using HAML templates on the 
+function is provided to simplify using Haml templates on the 
 classpath with enlive:
 
 ```clojure
 (require '[net.cgrand.enlive-html :as enlive])
 (require '[com.github.ragnard.hamelito.enlive :as [haml]])
 
-(defsnippet snippet1 (haml/resource "page1.haml")
+(enlive/defsnippet snippet1 (haml/resource "page1.haml")
   [:body :h1] (enlive/content "Hola!"))
 
-(deftemplate page1 (haml/resource "page1.haml")
+(enlive/deftemplate page1 (haml/resource "page1.haml")
   [:head :title] (enlive/content "Welcome!"))
 ```
 
