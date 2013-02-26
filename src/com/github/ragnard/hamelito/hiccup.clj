@@ -3,7 +3,6 @@
             [com.github.ragnard.hamelito.parser   :as parser]
             [hiccup.core       :as hiccup]
             [clojure.string    :as string])
-  (:use com.github.ragnard.hamelito.util)
   (:import [com.github.ragnard.hamelito.parser
             Comment
             Document
@@ -11,6 +10,15 @@
             Element
             Text
             FilteredBlock]))
+
+(when (< (:minor *clojure-version*) 5)
+  (use 'com.github.ragnard.hamelito.util))
+
+(def vec-conj (fnil conj []))
+
+(defn flat-conj
+  [vec xs]
+  (apply vec-conj vec xs))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Hiccup Generation

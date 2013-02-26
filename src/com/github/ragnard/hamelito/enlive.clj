@@ -3,7 +3,6 @@
             [com.github.ragnard.hamelito.parser   :as parser]
             [clojure.string    :as string]
             [clojure.java.io   :as io])
-  (:use com.github.ragnard.hamelito.util)
   (:import [com.github.ragnard.hamelito.parser
             Comment
             Document
@@ -11,6 +10,15 @@
             Element
             Text
             FilteredBlock]))
+
+(when (< (:minor *clojure-version*) 5)
+  (use 'com.github.ragnard.hamelito.util))
+
+(def vec-conj (fnil conj []))
+
+(defn flat-conj
+  [vec xs]
+  (apply vec-conj vec xs))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Enlive Generation
