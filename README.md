@@ -55,7 +55,8 @@ Things that should work:
   - `:cdata`
   - `:css`
 - Doctypes 
-  - Only `!!!` is currently supported an will yield HTML5 doctype
+  - All html5 and xhtml doctypes are supported
+  - XML prolog supported `!!! XML iso-8859-1`
 
 Hiccup to html translation [tests](https://github.com/ragnard/hamelito/blob/master/test/hamelito/hiccup_test.clj).
 
@@ -65,8 +66,7 @@ Things todo/investigate:
 - Comments
   - Silent
 - Whitespace handling/preservation
-- More doctypes, especially !!! XML with encoding
-- Filters?
+- More filters?
   - Maybe these make sense:
     - `:escaped`
 
