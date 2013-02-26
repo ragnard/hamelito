@@ -24,7 +24,7 @@ hamelito artifacts are published to [Clojars](http://clojars.org).
 With Leiningen:
 
 ```
-[com.github.ragnard/hamelito "0.1.0"]
+[com.github.ragnard/hamelito "0.1.1"]
 ```
 
 
