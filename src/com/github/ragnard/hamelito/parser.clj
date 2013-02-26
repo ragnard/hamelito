@@ -25,7 +25,7 @@
 ;;;; Parse Tree
 
 (defrecord Document [doctypes elements])
-(defrecord Doctype [value])
+(defrecord Doctype [type opts])
 (defrecord Text [text])
 (defrecord FilteredBlock [type lines])
 (defrecord Element [name id classes attributes text children])
@@ -88,6 +88,8 @@
 
 (def vspace             (many new-line*))
 
+(def hspace             (many (one-of* (str \space \tab))))
+
 (defn- anything-but
   [char]
   (satisfy #(not= % char)))
@@ -106,7 +108,7 @@
 
 (defn trim-spaces
   [p]
-  (<< p (many (one-of* (str \space \tab)))))
+  (<< p hspace))
 
 (defn parens*
   [p]
@@ -130,13 +132,16 @@
 ;;;;--------------------------------------------------------------------
 ;;;; doctype
 
-(def doctype-def       (token* "!!!" ))
-(def doctype-value     (>> (sym* \space)
-                           (<+> (many (anything-but \newline)))))
-(def doctype           (bind [_     doctype-def
-                              value (optional doctype-value)
-                              _     (modify-state add-doctype (map->Doctype {:value (or value :default)}))]
+(def doctype-def       (token* "!!!"))
+(def doctype-values    (sep-by hspace
+                               (<+> (many1 identifier2))))
+
+(def doctype           (bind [_      (trim-spaces doctype-def)
+                              values (optional doctype-values)
+                              _      (modify-state add-doctype (map->Doctype {:type (or (first values) :default)
+                                                                              :opts (vec (rest values))}))]
                              (return {:doctype (or value :default)})))
+
 (def doctypes          (sep-end-by vspace doctype))
 
 ;;;;--------------------------------------------------------------------

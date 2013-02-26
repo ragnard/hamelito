@@ -1,4 +1,10 @@
-(ns com.github.ragnard.hamelito.doctypes)
+(ns com.github.ragnard.hamelito.doctypes
+  (:require [com.github.ragnard.hamelito.config :as config]))
+
+(defn- xml
+  [opts]
+  (let [encoding (or (first opts) "utf-8")]
+    (str "<?xml version='1.0' encoding='" encoding "' ?>")))
 
 (def ^:private doctypes
   {:xhtml
@@ -24,10 +30,25 @@
     "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.2//EN\" \"http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd\">"
 
     "RDFa"
-    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML+RDFa 1.0//EN\" \"http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd\">"}
+    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML+RDFa 1.0//EN\" \"http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd\">"
+
+    "XML"
+    xml}
+
    :html5
-   {:default "<!DOCTYPE html>\n"}})
+   {:default
+    "<!DOCTYPE html>\n"
+
+    "XML"
+    xml}})
 
 (defn lookup-doctype
-  [format value]
-  (-> doctypes format :default))
+  [name opts]
+  (let [doctype (get-in doctypes [(config/format) name])]
+    (cond
+     (fn? doctype)     (doctype opts)
+     (string? doctype) doctype
+     true              (throw (ex-info (format "Unknown doctype '%s' for format '%s'"
+                                               name (config/format))
+                                       {:doctype-name name
+                                        :haml-format  (config/format)})))))

@@ -3,6 +3,7 @@
             [com.github.ragnard.hamelito.parser   :as parser]
             [clojure.string    :as string]
             [clojure.java.io   :as io])
+  (:use com.github.ragnard.hamelito.util)
   (:import [com.github.ragnard.hamelito.parser
             Comment
             Document
@@ -11,21 +12,11 @@
             Text
             FilteredBlock]))
 
-;; bring in the cond->
-(when (< (:minor *clojure-version*) 5)
-  (use 'com.github.ragnard.hamelito.util))
-
-(def vec-conj (fnil conj []))
-
-(defn- flat-conj
-  [vec xs]
-  (apply vec-conj vec xs))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Enlive generation
+;;;; Enlive Generation
 
 (defprotocol ToEnliveNode
-  (-enlive-node [this]))
+  (->enlive-node [this]))
 
 (defn- element->enlive-node
   [{:keys [name id classes attributes inline-content children] :as element}]
@@ -44,7 +35,7 @@
           (update-in [:content] vec-conj inline-content)
 
           children
-          (update-in [:content] flat-conj (map -enlive-node children))))
+          (update-in [:content] flat-conj (map ->enlive-node children))))
 
 (defn- comment->enlive-node
   [{:keys [text condition children]}]
@@ -80,25 +71,25 @@
 
 (extend-protocol ToEnliveNode
   Element
-  (-enlive-node [this] (element->enlive-node this))
+  (->enlive-node [this] (element->enlive-node this))
 
   Text
-  (-enlive-node [this] (:text this))
+  (->enlive-node [this] (:text this))
 
   Comment
-  (-enlive-node [this] (comment->enlive-node this))
+  (->enlive-node [this] (comment->enlive-node this))
 
   FilteredBlock
-  (-enlive-node [this] (filtered-block->enlive-node this))
+  (->enlive-node [this] (filtered-block->enlive-node this))
   
   
   Doctype
-  (-enlive-node [this] (doctypes/lookup-doctype :html5 (:value this)))
+  (->enlive-node [this] (doctypes/lookup-doctype (:type this) (:opts this)))
 
   Document
-  (-enlive-node [this]
-    (concat (map -enlive-node (:doctypes this))
-            (map -enlive-node (:elements this)))))
+  (->enlive-node [this]
+    (concat (map ->enlive-node (:doctypes this))
+            (map ->enlive-node (:elements this)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Public API
@@ -110,7 +101,7 @@
   [haml-source]
   (-> haml-source
       parser/parse-tree
-      -enlive-node))
+      ->enlive-node))
 
 (defn parser
   "A parser for Haml documents implementing the enlive pluggable

@@ -3,6 +3,7 @@
             [com.github.ragnard.hamelito.parser   :as parser]
             [hiccup.core       :as hiccup]
             [clojure.string    :as string])
+  (:use com.github.ragnard.hamelito.util)
   (:import [com.github.ragnard.hamelito.parser
             Comment
             Document
@@ -11,19 +12,11 @@
             Text
             FilteredBlock]))
 
-;; bring in the cond->
-(when (< (:minor *clojure-version*) 5)
-  (use 'com.github.ragnard.hamelito.util))
-
-(defn- flat-conj
-  [vec xs]
-  (apply conj vec xs))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Hiccup Conversion
+;;;; Hiccup Generation
 
 (defprotocol ToHiccup
-  (-to-hiccup [this]))
+  (->hiccup [this]))
 
 (defn element-tag
   [{:keys [name id classes]}]
@@ -44,7 +37,7 @@
           (conj inline-content)
 
           children
-          (flat-conj (mapv -to-hiccup children))))
+          (flat-conj (mapv ->hiccup children))))
 
 (defn comment->hiccup
   [{:keys [text condition children]}]
@@ -53,7 +46,7 @@
             ["<!-- "])
           (when text
             [text])
-          (mapv -to-hiccup children)
+          (mapv ->hiccup children)
           (if condition
             ["<![endif]-->"]
             [" -->"])))
@@ -86,28 +79,28 @@
 
 (extend-protocol ToHiccup
   Element
-  (-to-hiccup [this] (element->hiccup this))
+  (->hiccup [this] (element->hiccup this))
 
   Text
-  (-to-hiccup [this] (:text this))
+  (->hiccup [this] (:text this))
 
   FilteredBlock
-  (-to-hiccup [this] (filtered-block->hiccup this))
+  (->hiccup [this] (filtered-block->hiccup this))
   
   Comment
-  (-to-hiccup [this] (comment->hiccup this))
+  (->hiccup [this] (comment->hiccup this))
   
   Doctype
-  (-to-hiccup [this] (doctypes/lookup-doctype :html5 (:value this)))
+  (->hiccup [this] (doctypes/lookup-doctype (:type this) (:opts this)))
   
   Document
-  (-to-hiccup [this] (concat
-                      (mapv -to-hiccup (:doctypes this))
-                      (mapv -to-hiccup (:elements this)))))
+  (->hiccup [this] (concat
+                      (mapv ->hiccup (:doctypes this))
+                      (mapv ->hiccup (:elements this)))))
 
 (defn- to-hiccup
   [parse-tree]
-  (-to-hiccup parse-tree))
+  (->hiccup parse-tree))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Public API

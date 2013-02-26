@@ -1,5 +1,6 @@
 (ns com.github.ragnard.hamelito.hiccup-test
-  (:require [com.github.ragnard.hamelito.hiccup :as hiccup])
+  (:require [com.github.ragnard.hamelito.hiccup :as hiccup]
+            [com.github.ragnard.hamelito.config :as config])
   (:use [clojure.test]))
 
 (defmacro defhtmltest
@@ -172,7 +173,14 @@
   "<!DOCTYPE html>\n<div>Blahonga</div>"
 
   "\n\n!!!\n\n%div Blahonga\n\n"
-  "<!DOCTYPE html>\n<div>Blahonga</div>")
+  "<!DOCTYPE html>\n<div>Blahonga</div>"
+
+  "!!! XML\n\n!!!\n\n%div Blahonga\n\n"
+  "<?xml version='1.0' encoding='utf-8' ?><!DOCTYPE html>\n<div>Blahonga</div>"
+
+  "!!! XML iso-8859-1\n\n!!!\n\n%div Blahonga\n\n"
+  "<?xml version='1.0' encoding='iso-8859-1' ?><!DOCTYPE html>\n<div>Blahonga</div>"
+  )
 
 (defhtmltest html-comments
 
