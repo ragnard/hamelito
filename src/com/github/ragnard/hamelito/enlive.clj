@@ -2,7 +2,8 @@
   (:require [com.github.ragnard.hamelito.doctypes :as doctypes]
             [com.github.ragnard.hamelito.parser   :as parser]
             [clojure.string    :as string]
-            [clojure.java.io   :as io])
+            [clojure.java.io   :as io]
+            [clojure.walk      :as walk])
   (:import [com.github.ragnard.hamelito.parser
             Comment
             Document
@@ -37,7 +38,7 @@
           (assoc-in [:attrs :class] (string/join " " classes))
 
           attributes
-          (update-in [:attrs] merge attributes)
+          (update-in [:attrs] merge (walk/keywordize-keys attributes))
 
           (not (string/blank? inline-content))
           (update-in [:content] vec-conj inline-content)
