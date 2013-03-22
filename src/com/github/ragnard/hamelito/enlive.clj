@@ -21,7 +21,7 @@
   (apply vec-conj vec xs))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Enlive Generation
+;;;; Enlive Translation
 
 (defprotocol ToEnliveNode
   (->enlive-node [this]))
@@ -49,7 +49,7 @@
   [{:keys [text condition children]}]
   (when children
     (throw (ex-info "Children to comments not yet supported" {})))
-  (cond-> {:tag :comment}
+  (cond-> {:type :comment}
 
           condition
           (assoc :data (str "[" condition "]" text "<![endif]"))
