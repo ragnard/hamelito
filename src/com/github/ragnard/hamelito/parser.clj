@@ -1,6 +1,7 @@
 (ns com.github.ragnard.hamelito.parser
   (:refer-clojure :exclude [class])
-  (:require [clojure.string :as string])
+  (:require [clojure.string  :as string]
+            [clojure.java.io :as io])
   (:use [blancas.kern.core :exclude [char-seq]]))
 
 (defprotocol CharSeq
@@ -18,18 +19,25 @@
   (char-seq [s] (seq s))
 
   java.io.Reader
-  (char-seq [rdr] (reader-char-seq rdr)))
+  (char-seq [rdr] (reader-char-seq rdr))
+
+  java.io.File
+  (char-seq [file] (char-seq (io/reader file))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Parse Tree
 
-(defrecord Document [doctypes elements])
-(defrecord Doctype [type opts])
+(defrecord Document [header elements])
+
+(defrecord Doctype [name])
+(defrecord XmlProlog [opts])
+
+(defrecord Element [name id classes attributes text children])
 (defrecord Text [text])
 (defrecord FilteredBlock [type lines])
-(defrecord Element [name id classes attributes text children])
 (defrecord Comment [text condition children])
+
 
 ;;;;--------------------------------------------------------------------
 ;;;; Parse tree construction
@@ -70,9 +78,9 @@
 
 ;;;; Parser state functions
 
-(defn- add-doctype
-  [state doctype]
-  (update-in state [:document :doctypes] conj doctype))
+(defn- add-header
+  [state header]
+  (update-in state [:document :header] conj header))
 
 (defn- add-node
   [state level node]
@@ -133,16 +141,34 @@
 ;;;; doctype
 
 (def doctype-def       (token* "!!!"))
-(def doctype-values    (sep-by hspace
-                               (<+> (many1 identifier2))))
+(def doctype-name      (<+> (many1 identifier2)))
 
 (def doctype           (bind [_      (trim-spaces doctype-def)
-                              values (optional doctype-values)
-                              _      (modify-state add-doctype (map->Doctype {:type (or (first values) :default)
-                                                                              :opts (vec (rest values))}))]
-                             (return {:doctype (or value :default)})))
+                              name   (optional doctype-name)
+                              _      (modify-state add-header
+                                                   (map->Doctype {:name (or name :default)}))]
+                             (return {:doctype (or name :default)})))
 
 (def doctypes          (sep-end-by vspace doctype))
+
+;;;;--------------------------------------------------------------------
+;;;; XML prolog
+
+(def xml-prolog-def    (token* "!!! XML"))
+(def xml-prolog-opts   (sep-end-by hspace
+                                   (<+> (many1 identifier2))))
+
+(def xml-prolog        (bind [_      (trim-spaces xml-prolog-def)
+                              values (optional xml-prolog-opts)
+                              _      (modify-state add-header (map->XmlProlog{:opts values}))]
+                             (return {:xml-prolog (or values :default)})))
+
+;;;;--------------------------------------------------------------------
+;;;; header
+
+(def header            (sep-end-by vspace (<|> xml-prolog
+                                               doctype)))
+
 
 ;;;;--------------------------------------------------------------------
 ;;;; attributes
@@ -248,7 +274,7 @@
 (def nested-content    (bind [text (<+> (anything-but \space)
                                         (many (anything-but \newline)))]
                              (return (map->Text
-                                      {:text text}))))
+                                      {:text (str text "\n")}))))
 
 ;;;;--------------------------------------------------------------------
 ;;;; Filtered Content
@@ -292,9 +318,9 @@
 
 (def lines             (sep-end-by vspace tag-line))
 
-(def haml              (bind [ds doctypes
+(def haml              (bind [h  header
                               ls lines]
-                             (return {:doctypes ds
+                             (return {:header  h
                                       :content ls})))
 
 (def start             (>> vspace (<< haml eof)))

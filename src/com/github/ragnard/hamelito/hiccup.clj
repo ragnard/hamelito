@@ -1,5 +1,5 @@
 (ns com.github.ragnard.hamelito.hiccup
-  (:require [com.github.ragnard.hamelito.doctypes :as doctypes]
+  (:require [com.github.ragnard.hamelito.header :as header]
             [com.github.ragnard.hamelito.parser   :as parser]
             [hiccup.core       :as hiccup]
             [clojure.string    :as string])
@@ -9,7 +9,8 @@
             Doctype
             Element
             Text
-            FilteredBlock]))
+            FilteredBlock
+            XmlProlog]))
 
 (when (< (:minor *clojure-version*) 5)
   (use 'com.github.ragnard.hamelito.util))
@@ -21,7 +22,7 @@
   (apply vec-conj vec xs))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Hiccup Generation
+;;;; Hiccup Translation
 
 (defprotocol ToHiccup
   (->hiccup [this]))
@@ -85,6 +86,16 @@
   (throw (ex-info (format "Unsupported filter type: %s" (:type filtered-block))
                   {:node filtered-block})))
 
+(defn- doctype->hiccup
+  [{:keys [name]}]
+  (str "<!DOCTYPE "
+       (apply str (header/lookup-doctype name))
+       ">\n"))
+
+(defn- xml-prolog->hiccup
+  [{:keys [opts]}]
+  (header/xml-prolog opts))
+
 (extend-protocol ToHiccup
   Element
   (->hiccup [this] (element->hiccup this))
@@ -99,12 +110,14 @@
   (->hiccup [this] (comment->hiccup this))
   
   Doctype
-  (->hiccup [this] (doctypes/lookup-doctype (:type this) (:opts this)))
+  (->hiccup [this] (doctype->hiccup this))
+
+  XmlProlog
+  (->hiccup [this] (xml-prolog->hiccup this))
   
   Document
-  (->hiccup [this] (concat
-                      (mapv ->hiccup (:doctypes this))
-                      (mapv ->hiccup (:elements this)))))
+  (->hiccup [this] (concat (mapv ->hiccup (:header this))
+                           (mapv ->hiccup (:elements this)))))
 
 (defn- to-hiccup
   [parse-tree]

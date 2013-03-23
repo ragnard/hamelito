@@ -1,5 +1,5 @@
 (ns com.github.ragnard.hamelito.enlive
-  (:require [com.github.ragnard.hamelito.doctypes :as doctypes]
+  (:require [com.github.ragnard.hamelito.header :as header]
             [com.github.ragnard.hamelito.parser   :as parser]
             [clojure.string    :as string]
             [clojure.java.io   :as io]
@@ -10,7 +10,8 @@
             Doctype
             Element
             Text
-            FilteredBlock]))
+            FilteredBlock
+            XmlProlog]))
 
 (when (< (:minor *clojure-version*) 5)
   (use 'com.github.ragnard.hamelito.util))
@@ -77,6 +78,13 @@
   (throw (ex-info (format "Unsupported filter type: %s" (:type filtered-block))
                   {:node filtered-block})))
 
+(defn- doctype->enlive-node
+  [{:keys [name]}]
+  {:type :dtd :data (header/lookup-doctype name)})
+
+(defn- xml-prolog->enlive-node
+  [{:keys [opts]}]
+  (header/xml-prolog opts))
 
 (extend-protocol ToEnliveNode
   Element
@@ -91,13 +99,15 @@
   FilteredBlock
   (->enlive-node [this] (filtered-block->enlive-node this))
   
-  
   Doctype
-  (->enlive-node [this] (doctypes/lookup-doctype (:type this) (:opts this)))
+  (->enlive-node [this] (doctype->enlive-node this))
 
+  XmlProlog
+  (->enlive-node [this] (xml-prolog->enlive-node this))
+  
   Document
   (->enlive-node [this]
-    (concat (map ->enlive-node (:doctypes this))
+    (concat (map ->enlive-node (:header this))
             (map ->enlive-node (:elements this)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
