@@ -28,6 +28,10 @@
 (defprotocol ToEnliveNode
   (->enlive-node [this]))
 
+(defn- join-nodes
+  [nodes]
+  (interpose "\n" nodes))
+
 (defn- element->enlive-node
   [{:keys [name id classes attributes inline-content children] :as element}]
   (cond-> {:tag (or (keyword name) :div)}
@@ -45,7 +49,7 @@
           (update-in [:content] vec-conj inline-content)
 
           children
-          (update-in [:content] flat-conj (map ->enlive-node children))))
+          (update-in [:content] flat-conj (join-nodes (map ->enlive-node children)))))
 
 (defn- comment->enlive-node
   [{:keys [text condition children]}]
@@ -108,7 +112,7 @@
   Document
   (->enlive-node [this]
     (concat (map ->enlive-node (:header this))
-            (map ->enlive-node (:elements this)))))
+            (join-nodes (map ->enlive-node (:elements this))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Public API

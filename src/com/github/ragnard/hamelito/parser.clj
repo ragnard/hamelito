@@ -274,7 +274,7 @@
 (def nested-content    (bind [text (<+> (anything-but \space)
                                         (many (anything-but \newline)))]
                              (return (map->Text
-                                      {:text (str text "\n")}))))
+                                      {:text (str text)}))))
 
 ;;;;--------------------------------------------------------------------
 ;;;; Filtered Content
