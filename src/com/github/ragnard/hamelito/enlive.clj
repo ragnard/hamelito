@@ -120,7 +120,7 @@
 (defn node-seq
   "Returns a seq of enlive nodes from the given haml-source. A
   haml-source is anything that satisfies the CharSeq protocol,
-  typically a String or a Reader."
+  typically a String, Reader or a File."
   [haml-source]
   (-> haml-source
       parser/parse-tree

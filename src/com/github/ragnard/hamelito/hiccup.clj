@@ -1,8 +1,8 @@
 (ns com.github.ragnard.hamelito.hiccup
   (:require [com.github.ragnard.hamelito.header :as header]
-            [com.github.ragnard.hamelito.parser   :as parser]
-            [hiccup.core       :as hiccup]
-            [clojure.string    :as string])
+            [com.github.ragnard.hamelito.parser :as parser]
+            [hiccup.core                        :as hiccup]
+            [clojure.string                     :as string])
   (:import [com.github.ragnard.hamelito.parser
             Comment
             Document
@@ -73,7 +73,6 @@
 (defmethod filtered-block->hiccup :css
   [filtered-block]
   [:style (apply str (interpose "\n" (:lines filtered-block)))])
-
 
 (defmethod filtered-block->hiccup :cdata
   [filtered-block]
