@@ -1,6 +1,6 @@
 (ns com.github.ragnard.hamelito.enlive
   (:require [com.github.ragnard.hamelito.header :as header]
-            [com.github.ragnard.hamelito.parser   :as parser]
+            [com.github.ragnard.hamelito.parser :as parser]
             [clojure.string    :as string]
             [clojure.java.io   :as io]
             [clojure.walk      :as walk])
