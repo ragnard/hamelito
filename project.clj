@@ -1,4 +1,4 @@
-(defproject com.github.ragnard/hamelito "0.2.1-SNAPSHOT"
+(defproject com.github.ragnard/hamelito "0.2.1"
   :description "Library for a subset of Haml with hiccup and enlive support"
   :url "http://github.com/ragnard/hamelito"
   :license {:name "Eclipse Public License"

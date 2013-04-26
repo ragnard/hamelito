@@ -9,7 +9,6 @@ ability to read a subset of Haml and generate [hiccup](https://github.com/weavej
 data. Parsing is done using the quite awesome parser combinator
 library [kern](https://github.com/blancas/kern/) by Armando Blancas.
 
-
 The initial goal for the library is to allow Haml documents to be used
 as templates for [enlive](http://github.com/cgrand/enlive) and the
 plan is to support only the features of Haml that make sense for the
@@ -24,7 +23,7 @@ hamelito artifacts are published to [Clojars](http://clojars.org).
 With Leiningen:
 
 ```
-[com.github.ragnard/hamelito "0.2.0"]
+[com.github.ragnard/hamelito "0.2.1"]
 ```
 
 
@@ -57,8 +56,6 @@ Things that should work:
 - Doctypes 
   - All html5 and xhtml doctypes are supported
   - XML prolog supported `!!! XML iso-8859-1`
-
-Hiccup to html translation [tests](https://github.com/ragnard/hamelito/blob/master/test/hamelito/hiccup_test.clj).
 
 Things todo/investigate:
 - Be more strict with valid identifiers when parsing
